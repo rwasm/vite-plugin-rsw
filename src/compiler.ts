@@ -1,5 +1,7 @@
 import { spawnSync, spawn } from 'child_process';
 import chalk from 'chalk';
+import chokidar from 'chokidar';
+import path from 'path';
 
 import { RswConfig, WasmOptions, RswPluginOptions } from './types';
 import { debugCompiler } from './utils';
@@ -58,5 +60,28 @@ export function compile(config: RswPluginOptions, sync: boolean = false) {
   debugCompiler('Compile using wasm-pack');
   crates.forEach((i: WasmOptions) => {
     compileOne(opts, i, sync);
+  })
+}
+
+
+type WatchCallback = (config: RswPluginOptions) => void;
+
+export function watch(config: RswPluginOptions, wcb: WatchCallback) {
+  config.crates.forEach((options) => {
+    // One-liner for current directory
+    // https://github.com/paulmillr/chokidar
+    chokidar.watch([
+      path.resolve(options.path, 'src'),
+      path.resolve(options.path, 'Cargo.toml'),
+    ], {
+      ignoreInitial: true,
+    }).on('all', (event, path) => {
+      // console.log(event, path);
+      console.log(
+        chalk.bgBlueBright(`[event:${event}] `),
+        chalk.yellow(`File ${path}`),
+      );
+      wcb(config);
+    });
   })
 }

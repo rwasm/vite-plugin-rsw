@@ -1,3 +1,10 @@
 .DS_Store
 
+dist/
 node_modules
+
+pnpm-lock.yaml
+*.lock
+
+# rust
+target/
