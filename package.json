@@ -1,0 +1,44 @@
+{
+  "name": "vite-plugin-rsw",
+  "description": "wasm-pack plugin for vite@v2",
+  "author": "lencx <cxin1314@gmail.com>",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "npm run build -- --watch",
+    "build": "tsup src/index.ts --dts --format cjs,esm",
+    "prepublishOnly": "npm run build",
+    "release": "npx bumpp --push --tag --commit && npm publish",
+    "example:dev": "npm -C example run dev",
+    "example:build": "npm -C example run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lencx/vite-plugin-rsw"
+  },
+  "homepage": "https://github.com/lencx/vite-plugin-rsw",
+  "bugs": "https://github.com/lencx/vite-plugin-rsw/issues",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^4.3.1",
+    "which": "^2.0.2"
+  },
+  "peerDependencies": {
+    "vite": "^2.0.0-beta.1"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.4.3",
+    "@types/debug": "^4.1.5",
+    "@types/node": "^14.14.20",
+    "@types/which": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.12.0",
+    "eslint": "^7.17.0",
+    "tsup": "^3.11.0",
+    "typescript": "^4.1.3",
+    "vite": "^2.0.0-beta.10"
+  }
+}
