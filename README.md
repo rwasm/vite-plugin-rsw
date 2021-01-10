@@ -2,7 +2,9 @@
 
 > wasm-pack plugin for vite@v2
 
-## Getting Started
+TODO
+
+<!-- ## Getting Started
 
 > Install rsw
 
@@ -31,4 +33,4 @@ export default defineConfig({
     }),
   ],
 })
-```
+``` -->
