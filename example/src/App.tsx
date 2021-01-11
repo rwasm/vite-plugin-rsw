@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import logo from './logo.svg'
 import './App.css'
-import init, { greet } from '../rsw/pkg/hey';
+import init, { greet } from '../rsw-test/pkg';
 
 function App() {
   useEffect(() => {
