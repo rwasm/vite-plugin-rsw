@@ -1,17 +1,18 @@
-/**
- * Plugin options.
- */
 export interface RswConfig {
   mode?: 'dev' | 'release';
   target?: 'web' | 'bundler' | 'nodejs' | 'no-modules'
 }
 
-export interface WasmOptions {
+export interface RswWasmOptions {
   path: string;
+  pkgName?: string;
   outName?: string;
   scope?: string;
 }
 
+// Plugin options
 export interface RswPluginOptions extends RswConfig {
-  crates: WasmOptions[];
+  crates: RswWasmOptions[];
 }
+
+export type RswWatchCallback = (config: RswPluginOptions) => void;

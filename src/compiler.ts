@@ -1,18 +1,18 @@
-import { spawnSync, spawn } from 'child_process';
+import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
-import path from 'path';
+import { spawnSync, spawn } from 'child_process';
 
-import { RswConfig, WasmOptions, RswPluginOptions } from './types';
 import { debugCompiler } from './utils';
+import { RswConfig, RswWasmOptions, RswPluginOptions, RswWatchCallback } from './types';
 
 function checkStatus(crate: string, status: number | null) {
   if (status !== 0) {
-    throw chalk.red(`wasm-pack for crate ${crate} failed`);
+    throw chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`);
   }
 }
 
-function compileOne(config: RswConfig, options: WasmOptions, sync: boolean) {
+function compileOne(config: RswConfig, options: RswWasmOptions, sync: boolean) {
   const {
     mode = 'dev',
     target = 'web',
@@ -58,15 +58,13 @@ function compileOne(config: RswConfig, options: WasmOptions, sync: boolean) {
 export function compile(config: RswPluginOptions, sync: boolean = false) {
   const { crates, ...opts } = config;
   debugCompiler('Compile using wasm-pack');
-  crates.forEach((i: WasmOptions) => {
-    compileOne(opts, i, sync);
+  crates.forEach((crate: RswWasmOptions) => {
+    compileOne(opts, crate, sync);
   })
 }
 
 
-type WatchCallback = (config: RswPluginOptions) => void;
-
-export function watch(config: RswPluginOptions, wcb: WatchCallback) {
+export function watch(config: RswPluginOptions, wcb: RswWatchCallback) {
   config.crates.forEach((options) => {
     // One-liner for current directory
     // https://github.com/paulmillr/chokidar
@@ -76,9 +74,8 @@ export function watch(config: RswPluginOptions, wcb: WatchCallback) {
     ], {
       ignoreInitial: true,
     }).on('all', (event, path) => {
-      // console.log(event, path);
       console.log(
-        chalk.bgBlueBright(`[event:${event}] `),
+        chalk.bgBlueBright(`[rsw::event(${event})] `),
         chalk.yellow(`File ${path}`),
       );
       wcb(config);

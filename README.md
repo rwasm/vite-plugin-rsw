@@ -2,7 +2,9 @@
 
 > wasm-pack plugin for vite@v2
 
-TODO
+## TODO
+
+- [ ] vite build
 
 <!-- ## Getting Started
 

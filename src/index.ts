@@ -1,10 +1,8 @@
-import type { Plugin, ResolvedConfig } from 'vite'
+import type { Plugin } from 'vite'
 
 import { RswPluginOptions } from './types';
 import { compile, watch } from './compiler';
-import { debugConfig, checkENV } from './utils';
-
-const URL_PREFIX = '/@rsw/';
+import { debugConfig, checkENV, setRswAlias } from './utils';
 
 export function ViteRsw(config: RswPluginOptions): Plugin {
   debugConfig(config);
@@ -14,15 +12,13 @@ export function ViteRsw(config: RswPluginOptions): Plugin {
 
   watch(config, compile);
 
-  let cfg: ResolvedConfig;
-
   return {
     name: 'vite-plugin-rsw',
-    // enforce: 'post',
-
-    // configResolved(_cfg) {
-    //   cfg = _cfg;
-    // },
+    config() {
+      return {
+        alias: setRswAlias(config),
+      };
+    },
   };
 }
 
