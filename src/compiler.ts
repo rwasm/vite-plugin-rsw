@@ -3,8 +3,8 @@ import chalk from 'chalk';
 import chokidar from 'chokidar';
 import { spawnSync, spawn } from 'child_process';
 
-import { debugCompiler } from './utils';
-import { RswConfig, RswWasmOptions, RswPluginOptions, RswWatchCallback } from './types';
+import { isWin, debugCompiler, getCrateName } from './utils';
+import { RswConfig, RswWasmOptions, RswPluginOptions } from './types';
 
 function checkStatus(crate: string, status: number | null) {
   if (status !== 0) {
@@ -24,7 +24,7 @@ function compileOne(config: RswConfig, options: RswWasmOptions, sync: boolean) {
   } = options;
 
   let exe = 'wasm-pack';
-  if (process.platform === 'win32') {
+  if (isWin) {
     exe = 'wasm-pack.exe';
   }
   const args = ['build', `--${mode}`, '--target', target];
@@ -55,7 +55,7 @@ function compileOne(config: RswConfig, options: RswWasmOptions, sync: boolean) {
   }
 }
 
-export function compile(config: RswPluginOptions, sync: boolean = false) {
+export function rswCompile(config: RswPluginOptions, sync: boolean = false) {
   const { crates, ...opts } = config;
   debugCompiler('Compile using wasm-pack');
   crates.forEach((crate: RswWasmOptions) => {
@@ -63,22 +63,30 @@ export function compile(config: RswPluginOptions, sync: boolean = false) {
   })
 }
 
-
-export function watch(config: RswPluginOptions, wcb: RswWatchCallback) {
-  config.crates.forEach((options) => {
-    // One-liner for current directory
-    // https://github.com/paulmillr/chokidar
-    chokidar.watch([
-      path.resolve(options.path, 'src'),
-      path.resolve(options.path, 'Cargo.toml'),
-    ], {
-      ignoreInitial: true,
-    }).on('all', (event, path) => {
-      console.log(
-        chalk.bgBlueBright(`[rsw::event(${event})] `),
-        chalk.yellow(`File ${path}`),
-      );
-      wcb(config);
-    });
+export function rswWatch(config: RswPluginOptions) {
+  return new Promise((_, resolve) => {
+    config.crates.forEach((crate: RswWasmOptions) => {
+      // One-liner for current directory
+      // https://github.com/paulmillr/chokidar
+      chokidar.watch([
+        path.resolve(crate.path, 'src'),
+        path.resolve(crate.path, 'Cargo.toml'),
+      ], {
+        ignoreInitial: true,
+        ignored: ['**/node_modules/**', '**/.git/**'],
+        awaitWriteFinish: {
+          stabilityThreshold: 100,
+          pollInterval: 10
+        },
+        usePolling: true
+      }).on('all', (event, _path) => {
+        console.log(
+          chalk.bgBlueBright(`[rsw::event(${event})] `),
+          chalk.yellow(`File ${_path}`),
+        );
+        rswCompile(config, false);
+        resolve(path.resolve(crate.path, `pkg/${getCrateName(crate)}_bg.wasm`));
+      });
+    })
   })
 }

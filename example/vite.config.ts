@@ -13,6 +13,6 @@ export default defineConfig({
         { path: path.resolve(__dirname, 'rsw-test') },
         // { pkgName: 'rsw2', path: path.resolve(__dirname, 'rsw-test') },
       ]
-    })
+    }),
   ],
 })

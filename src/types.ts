@@ -14,5 +14,3 @@ export interface RswWasmOptions {
 export interface RswPluginOptions extends RswConfig {
   crates: RswWasmOptions[];
 }
-
-export type RswWatchCallback = (config: RswPluginOptions) => void;

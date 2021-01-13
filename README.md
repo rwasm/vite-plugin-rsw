@@ -5,6 +5,7 @@
 ## TODO
 
 - [ ] vite build
+- [ ] watch file
 
 <!-- ## Getting Started
 
