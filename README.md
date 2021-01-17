@@ -4,8 +4,9 @@
 
 ## TODO
 
+- [x] watch crates
+- [x] multiple crates
 - [ ] vite build
-- [ ] watch file
 
 <!-- ## Getting Started
 

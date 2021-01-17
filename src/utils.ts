@@ -13,9 +13,10 @@ export const debugConfig = debug('rsw:config');
 export const debugCompiler = debug('rsw:compiler');
 
 export const isWin = os.platform() === 'win32';
-export const bareImportRE = /^[\w@]/;
 
-export const getCrateName = (crate: RswWasmOptions) => crate.pkgName || crate.path.substring(crate.path.lastIndexOf('/') + 1);
+export const getCrateName = (crate: RswWasmOptions) => (
+  crate.pkgName || crate.path.substring(crate.path.lastIndexOf('/') + 1)
+);
 
 export function checkENV() {
   const wasmPack = which.sync('wasm-pack', { nothrow: true });

@@ -76,6 +76,7 @@ export function rswCompile(config: RswPluginOptions, options: RswCompileOptions)
   const { crates, ...opts } = config;
   const { root = '', crate, sync = false } = options;
   if (crate) {
+    debugCompiler('[WATCH] Compile using wasm-pack');
     return compileOne(opts, crate, root, sync);
   }
   debugCompiler('Compile using wasm-pack');
