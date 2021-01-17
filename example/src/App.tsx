@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react'
 import logo from './logo.svg'
 import './App.css'
-import init, { greet } from '../rsw/pkg';
-import init2, { greet as greet2 } from '../rsw-test/pkg';
+import init, { greet } from 'rsw';
+// import init2, { greet as greet2 } from '../rsw-test/pkg';
 
 function App() {
   useEffect(() => {
     init();
-    init2();
+    // init2();
   }, [])
 
   return (
@@ -18,12 +18,12 @@ function App() {
         <p>Vite + Rust + React</p>
         <p>
           <button onClick={() => greet('wasm')}>
-            hello wasm
+            hello wasm2
           </button>
           {' '}
-          <button onClick={() => greet2('wasm')}>
+          {/* <button onClick={() => greet2('wasm')}>
             hi wasm
-          </button>
+          </button> */}
         </p>
         <p>
           Edit <code>App.tsx</code> and save to test HMR updates.

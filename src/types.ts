@@ -14,3 +14,9 @@ export interface RswWasmOptions {
 export interface RswPluginOptions extends RswConfig {
   crates: RswWasmOptions[];
 }
+
+export interface RswCompileOptions {
+  root?: string;
+  sync?: boolean;
+  crate?: RswWasmOptions;
+}

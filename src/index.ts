@@ -1,20 +1,31 @@
-import type { Plugin } from 'vite'
+import type { Plugin, ViteDevServer } from 'vite';
 
 import { RswPluginOptions } from './types';
 import { rswCompile, rswWatch } from './compiler';
-import { debugConfig, checkENV, setRswAlias } from './utils';
+import {
+  debugConfig,
+  checkENV,
+  setRswAlias,
+} from './utils';
 
-export function ViteRsw(config: RswPluginOptions): Plugin {
-  debugConfig(config);
+export function ViteRsw(userOptions: RswPluginOptions): Plugin {
+  let server: ViteDevServer;
+  debugConfig(userOptions);
   checkENV();
-
-  rswCompile(config, true);
 
   return {
     name: 'vite-plugin-rsw',
+    enforce: 'pre',
+
+    async configureServer(_server) {
+      const root = _server.config.root;
+      rswCompile(userOptions, { root, sync: true });
+      rswWatch(userOptions, root);
+      server = _server;
+    },
     config() {
       return {
-        alias: setRswAlias(config),
+        alias: setRswAlias(userOptions),
       };
     },
   };

@@ -3,6 +3,7 @@ import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
 import path from 'path';
+import slash from 'slash';
 import os from 'os';
 
 import { RswPluginOptions, RswWasmOptions } from './types';
@@ -12,6 +13,7 @@ export const debugConfig = debug('rsw:config');
 export const debugCompiler = debug('rsw:compiler');
 
 export const isWin = os.platform() === 'win32';
+export const bareImportRE = /^[\w@]/;
 
 export const getCrateName = (crate: RswWasmOptions) => crate.pkgName || crate.path.substring(crate.path.lastIndexOf('/') + 1);
 
@@ -39,7 +41,9 @@ export function setRswAlias(config: RswPluginOptions): AliasOptions {
   })
 }
 
-// Normalizes a path to use forward slashes.
-export function normalizePath(str: string): string {
-  return str.replace(/\\/g, '/');
+export function normalizePath(id: string): string {
+  if (isWin) {
+    return path.posix.normalize(slash(id.replace(/^[A-Z]:/i, '')));
+  }
+  return path.posix.normalize(id);
 }
