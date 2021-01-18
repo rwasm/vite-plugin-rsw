@@ -1,5 +1,5 @@
 [package]
-name = "rsw"
+name = "rsw-test"
 version = "0.1.0"
 authors = ["lencx <cxin1314@gmail.com>"]
 edition = "2018"

@@ -7,11 +7,12 @@ export default defineConfig({
   plugins: [
     reactRefresh(),
     ViteRsw({
+      // root: 'abc',
       mode: 'release',
+      // target: 'web',
       crates: [
-        { path: 'rsw', outName: 'hey' },
-        { path: path.resolve(__dirname, 'rsw-test') },
-        // { pkgName: 'rsw2', path: path.resolve(__dirname, 'rsw-test') },
+        '@rsw/hey',
+        'rsw-test',
       ]
     }),
   ],

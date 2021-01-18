@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import logo from './logo.svg'
 import './App.css'
-import init, { greet } from 'rsw';
+import init, { greet } from '@rsw/hey';
 import init2, { greet as greet2 } from 'rsw-test';
 
 function App() {

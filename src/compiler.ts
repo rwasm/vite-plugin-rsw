@@ -3,98 +3,86 @@ import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
 import { spawnSync, spawn } from 'child_process';
+import includes from 'lodash/includes';
 
 import { isWin, debugCompiler, getCrateName } from './utils';
-import { RswConfig, RswWasmOptions, RswPluginOptions, RswCompileOptions } from './types';
+import { RswConfig, RswPluginOptions, RswCrateOptions } from './types';
 
-function checkStatus(crate: string, status: number | null) {
-  if (status !== 0) {
-    throw chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`);
-  }
-}
-
-function writeDTS(root: string, fileName: string, crate: RswWasmOptions) {
-  const _crate = getCrateName(crate);
-  const exist = fs.existsSync(`${root}/src/rsw.d`);
-  if (!exist) fs.mkdirSync(`${root}/src/rsw.d`);
-  const data = fs.readFileSync(`${root}/${_crate}/pkg/${fileName}.d.ts`);
-  fs.writeFileSync(`${root}/src/rsw.d/${_crate}.d.ts`, `declare module "${_crate}" {
-${data}
-}`);
-  console.log(
-    chalk.bgBlueBright(`[rsw::DTS] `),
-    chalk.yellow(`${root}/src/${_crate}.rsw.d`),
-  );
-}
-
-function compileOne(config: RswConfig, options: RswWasmOptions, root: string, sync: boolean) {
+function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: string, sync: boolean) {
   const {
     mode = 'dev',
     target = 'web',
   } = config;
-  const {
-    outName,
-    path: _path,
-    scope,
-  } = options;
 
-  let exe = 'wasm-pack';
+  let wp = 'wasm-pack';
   if (isWin) {
-    exe = 'wasm-pack.exe';
+    wp = 'wasm-pack.exe';
   }
   const args = ['build', `--${mode}`, '--target', target];
-  let out = (outName || _path.substring(_path.lastIndexOf('/') + 1))?.replace('-', '_');
-  args.push('--out-name', out)
 
+  let rswCrate: string;
+  let pkgName: string;
+  let scope: string | undefined;
+
+  rswCrate = getCrateName(crate);
+
+  if (rswCrate.startsWith('@')) {
+    const a = rswCrate.match(/(@.*)\/(.*)/) as string[];
+    scope = a?.[1].substring(1);
+    pkgName = a?.[2];
+  } else {
+    pkgName = rswCrate;
+  }
+
+  args.push('--out-name', pkgName)
   if (scope) args.push('--scope', scope);
 
-  debugCompiler('Running subprocess with command:', exe, args.join(' '));
+  debugCompiler('Running subprocess with command:', wp, args.join(' '));
 
   if (sync) {
-    let p = spawnSync(exe, args, {
+    let p = spawnSync(wp, args, {
       shell: true,
-      cwd: _path,
+      cwd: rswCrate,
       encoding: 'utf-8',
       stdio: ['inherit', 'inherit', 'inherit'],
     })
-    checkStatus(out, p.status);
-    writeDTS(root, out, options);
+    checkStatus(root, rswCrate, p.status);
   } else {
-    let p = spawn(exe, args, {
+    let p = spawn(wp, args, {
       shell: true,
-      cwd: _path,
+      cwd: rswCrate,
       stdio: ['inherit', 'inherit', 'inherit'],
     });
     p.on('close', code => {
-      checkStatus(out, code);
-      writeDTS(root, out, options);
+      checkStatus(root, rswCrate, code);
     });
   }
 }
 
-export function rswCompile(config: RswPluginOptions, options: RswCompileOptions) {
+export function rswCompile(config: RswPluginOptions, root: string, crate?: string) {
   const { crates, ...opts } = config;
-  const { root = '', crate, sync = false } = options;
+
   if (crate) {
-    debugCompiler('[WATCH] Compile using wasm-pack');
-    return compileOne(opts, crate, root, sync);
+    compileOne(opts, crate, root, true);
+    return;
   }
-  debugCompiler('Compile using wasm-pack');
-  crates.forEach((crate: RswWasmOptions) => {
-    compileOne(opts, crate, root, sync);
+
+  crates.forEach((crate) => {
+    compileOne(opts, crate, root, true);
   })
 }
 
 export function rswWatch(config: RswPluginOptions, root: string) {
-  config.crates.forEach((crate: RswWasmOptions) => {
+  config.crates.forEach((crate: string | RswCrateOptions) => {
+    const name = getCrateName(crate);
     // One-liner for current directory
     // https://github.com/paulmillr/chokidar
     chokidar.watch([
-      path.resolve(crate.path, 'src'),
-      path.resolve(crate.path, 'Cargo.toml'),
+      path.resolve(root, name, 'src'),
+      path.resolve(root, name, 'Cargo.toml'),
     ], {
       ignoreInitial: true,
-      ignored: ['**/node_modules/**', '**/.git/**'],
+      ignored: ['**/node_modules/**', '**/.git/**', '**/target/**'],
       awaitWriteFinish: {
         stabilityThreshold: 100,
         pollInterval: 10,
@@ -105,7 +93,42 @@ export function rswWatch(config: RswPluginOptions, root: string) {
         chalk.bgBlueBright(`[rsw::event(${event})] `),
         chalk.yellow(`File ${_path}`),
       );
-      rswCompile(config, { root, crate, sync: false });
+      rswCompile(config, root, name);
     });
   })
+}
+
+function rswPkgLink(root: string, crate: string) {
+  const cacheDir = path.resolve(root, 'node_modules/.rsw');
+
+  const runCmd = () => {
+    let npm = 'npm';
+    if (isWin) {
+      npm = 'npm.cmd';
+    };
+    const npmArgs = ['link', path.resolve(root, crate, 'pkg')];
+    spawnSync(npm, npmArgs, {
+      shell: true,
+      cwd: process.cwd(),
+      stdio: ['inherit', 'inherit', 'inherit'],
+    });
+    fs.appendFileSync(`${cacheDir}/link`, `${crate}\n`);
+  }
+
+  const existDir = fs.existsSync(cacheDir);
+  if (!existDir) {
+    fs.mkdirSync(cacheDir);
+    runCmd();
+  }
+  const data = fs.readFileSync(`${cacheDir}/link`, { encoding: 'utf-8' }).split('\n');
+  if (includes(data, crate)) return;
+  runCmd();
+}
+
+function checkStatus(root: string, crate: string, status: number | null) {
+  if (status !== 0) {
+    throw chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`);
+  } else {
+    rswPkgLink(root, crate);
+  }
 }

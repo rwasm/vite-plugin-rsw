@@ -6,7 +6,7 @@ import path from 'path';
 import slash from 'slash';
 import os from 'os';
 
-import { RswPluginOptions, RswWasmOptions } from './types';
+import { RswCrateOptions } from './types';
 
 export const debugStart = debug('rsw:start');
 export const debugConfig = debug('rsw:config');
@@ -14,8 +14,8 @@ export const debugCompiler = debug('rsw:compiler');
 
 export const isWin = os.platform() === 'win32';
 
-export const getCrateName = (crate: RswWasmOptions) => (
-  crate.pkgName || crate.path.substring(crate.path.lastIndexOf('/') + 1)
+export const getCrateName = (crate: string | RswCrateOptions): string => (
+  typeof crate === 'object' ? crate.name : crate
 );
 
 export function checkENV() {
@@ -31,15 +31,6 @@ export function checkENV() {
       chalk.green('https://github.com/rustwasm/wasm-pack'),
     );
   }
-}
-
-export function setRswAlias(config: RswPluginOptions): AliasOptions {
-  return config.crates.map((crate) => {
-    return {
-      find: getCrateName(crate),
-      replacement: path.resolve(crate.path, 'pkg'),
-    }
-  })
 }
 
 export function normalizePath(id: string): string {
