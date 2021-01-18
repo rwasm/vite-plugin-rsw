@@ -8,7 +8,7 @@
 - [x] multiple crates
 - [ ] vite build
 
-<!-- ## Getting Started
+## Getting Started
 
 > Install rsw
 
@@ -21,6 +21,7 @@ npm i -D vite-plugin-rsw
 ```js
 import { defineConfig } from 'vite'
 import { ViteRsw } from 'vite-plugin-rsw';
+import path from 'path';
 
 export default defineConfig({
   plugins: [
@@ -29,7 +30,12 @@ export default defineConfig({
       mode: 'release',
       crates: [
         {
-          path: './rust-crate',
+          path: 'rsw',
+          outName: 'hey', // out filename
+          scope: 'l8n', // package organization
+        },
+        {
+          path: path.resolve(__dirname, 'rsw-test')
           // outName: '',
           // scope: '',
         },
@@ -37,4 +43,4 @@ export default defineConfig({
     }),
   ],
 })
-``` -->
+```

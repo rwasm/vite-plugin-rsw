@@ -1,6 +1,6 @@
 import reactRefresh from '@vitejs/plugin-react-refresh';
 import { defineConfig } from 'vite';
-import { ViteRsw } from 'vite-plugin-rsw';
+import ViteRsw from 'vite-plugin-rsw';
 import path from 'path';
 
 export default defineConfig({
