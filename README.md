@@ -6,6 +6,7 @@
 
 - [x] watch crates
 - [x] multiple crates
+- [x] npm link
 - [ ] vite build
 
 ## Getting Started
@@ -20,26 +21,19 @@ npm i -D vite-plugin-rsw
 
 ```js
 import { defineConfig } from 'vite'
-import { ViteRsw } from 'vite-plugin-rsw';
+import ViteRsw from 'vite-plugin-rsw';
 import path from 'path';
 
 export default defineConfig({
   plugins: [
     ViteRsw({
-      // target: 'web',
+      // root: 'abc',
       mode: 'release',
+      // target: 'web',
       crates: [
-        {
-          path: 'rsw',
-          outName: 'hey', // out filename
-          scope: 'l8n', // package organization
-        },
-        {
-          path: path.resolve(__dirname, 'rsw-test')
-          // outName: '',
-          // scope: '',
-        },
-      ],
+        '@rsw/hey',
+        'rsw-test',
+      ]
     }),
   ],
 })
