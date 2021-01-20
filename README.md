@@ -32,7 +32,6 @@ yarn add -D vite-plugin-rsw
 // vite.config.ts
 import { defineConfig } from "vite";
 import ViteRsw from "vite-plugin-rsw";
-import path from "path";
 
 export default defineConfig({
   plugins: [
