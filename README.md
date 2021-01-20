@@ -65,7 +65,7 @@ opt-level = 'z'
 wasm-bindgen = "0.2.69"
 ```
 
-```rs
+```rust
 // src/lib.rs
 use wasm_bindgen::prelude::*;
 
@@ -96,7 +96,7 @@ pub fn greet(name: &str) {
 - `crates`:
   - `string[]`: package name, support npm organization.
 
-> **⚠️Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
+> **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
 ## License
 
