@@ -1,10 +1,7 @@
-import type { AliasOptions } from 'vite';
+import os from 'os';
 import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
-import path from 'path';
-import slash from 'slash';
-import os from 'os';
 
 import { RswCrateOptions } from './types';
 
@@ -31,11 +28,4 @@ export function checkENV() {
       chalk.green('https://github.com/rustwasm/wasm-pack'),
     );
   }
-}
-
-export function normalizePath(id: string): string {
-  if (isWin) {
-    return path.posix.normalize(slash(id.replace(/^[A-Z]:/i, '')));
-  }
-  return path.posix.normalize(id);
 }

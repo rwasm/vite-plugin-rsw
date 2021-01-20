@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
-import { spawnSync, spawn } from 'child_process';
 import includes from 'lodash/includes';
+import { spawnSync, spawn } from 'child_process';
 
 import { isWin, debugCompiler, getCrateName } from './utils';
 import { RswConfig, RswPluginOptions, RswCrateOptions } from './types';
@@ -29,7 +29,7 @@ function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: st
   if (rswCrate.startsWith('@')) {
     const a = rswCrate.match(/(@.*)\/(.*)/) as string[];
     scope = a?.[1].substring(1);
-    pkgName = a?.[2];
+    pkgName = `${scope}__${a?.[2]}`;
   } else {
     pkgName = rswCrate;
   }
