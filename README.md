@@ -2,6 +2,12 @@
 
 > wasm-pack plugin for vite@v2
 
+## Pre-installed
+
+* [rust](https://www.rust-lang.org/learn/get-started)
+* [nodejs](https://nodejs.org)
+* [wasm-pack](https://github.com/rustwasm/wasm-pack)
+
 ## Features
 
 - mode: `development build` or `release build`
@@ -97,9 +103,10 @@ pub fn greet(name: &str) {
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
-## 进微信群
+## 微信
 
-![wasm-wechat](./assets/wasm-qrcode.png)
+<img width="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" />
+<img width="180" src="./assets/lencx.png" alt="lencx-wechat-qrcode" />
 
 ## License
 
