@@ -105,8 +105,7 @@ pub fn greet(name: &str) {
 
 ## 微信
 
-<img width="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" />
-<img width="180" src="./assets/lencx.png" alt="lencx-wechat-qrcode" />
+<img width="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /><img width="180" src="./assets/lencx.png" alt="lencx-wechat-qrcode" />
 
 ## License
 
