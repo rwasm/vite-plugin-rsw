@@ -97,6 +97,10 @@ pub fn greet(name: &str) {
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
+## 进微信群
+
+![wasm-wechat](./assets/wasm-qrcode.png)
+
 ## License
 
 MIT License © 2021 [lencx](https://github.com/lencx)
