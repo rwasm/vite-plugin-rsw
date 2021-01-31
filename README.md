@@ -58,16 +58,21 @@ cargo new --lib <crate_name>
 ```toml
 # Cargo.toml
 
-[lib]
-crate-type = ["cdylib"]
+# https://github.com/rustwasm/wasm-pack/issues/886
+# https://developers.google.com/web/updates/2019/02/hotpath-with-wasm
+[package.metadata.wasm-pack.profile.release]
 wasm-opt = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [profile.release]
 lto = true
-opt-level = 'z'
+opt-level = "s"
 
 [dependencies]
-wasm-bindgen = "0.2.69"
+wasm-bindgen = "0.2.70"
 ```
 
 ```rust
