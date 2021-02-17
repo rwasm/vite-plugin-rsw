@@ -94,23 +94,34 @@ pub fn greet(name: &str) {
 
 ## Plugin Options
 
-- `root`: rust crate root path. default project root path.
-- `mode`
-  - `dev`: create a development build. Enable debug info, and disable optimizations.
-  - `release`: create a release build. Enable optimizations and disable debug info.
-- `target`: sets the target environment.
-  - `web`: default
-  - `bundler`
-  - `nodejs`
-  - `no-modules`
-- `crates`:
-  - `string[]`: package name, support npm organization.
+* `root`: rust crate root path. default project root path.
+* `mode`
+  * `dev`: create a development build. Enable debug info, and disable optimizations.
+  * `release`: create a release build. Enable optimizations and disable debug info.
+* `target`: sets the target environment.
+  * `web`: default
+  * `bundler`
+  * `nodejs`
+  * `no-modules`
+* `crates`:
+  * `string[]`: package name, support npm organization.
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
+## Examples
+
+* [react](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/react)
+* [vue3](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/vue3)
+* [learn-wasm](https://github.com/lencx/learn-wasm)
+
+## Related List
+
+* [WebAssembly入门](https://mtc.nofwl.com/tech/post/wasm-start.html)
+* [Awesome WebAssembly](https://mtc.nofwl.com/awesome/wasm.html)
+
 ## 微信
 
-<img width="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /><img width="180" src="./assets/lencx.png" alt="lencx-wechat-qrcode" />
+<img width="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /> <img width="180" src="./assets/lencx.png" alt="lencx-wechat-qrcode" />
 
 ## License
 
