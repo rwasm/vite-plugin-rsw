@@ -10,16 +10,18 @@
 
 ## Features
 
-- mode: `development build` or `release build`
-- multiple rust crate
-  - compile
-  - hot-update
+* mode: `development build` or `release build`
+* multiple rust crate
+  * compile
+  * hot-update
 
 ## Quick Start
 
 ```bash
 # more: https://github.com/lencx/create-xc-app
-npx create-xc-app my-app --template wasm-react
+npx create-xc-app my-react-wasm --template wasm-react
+# or
+npx create-xc-app my-vue-wasm --template wasm-vue
 ```
 
 ## Getting Started
@@ -94,7 +96,7 @@ pub fn greet(name: &str) {
 
 ## Plugin Options
 
-* `root`: rust crate root path. default project root path.
+<!-- * `root`: rust crate root path. default project root path. -->
 * `mode`
   * `dev`: create a development build. Enable debug info, and disable optimizations.
   * `release`: create a release build. Enable optimizations and disable debug info.
@@ -121,7 +123,9 @@ pub fn greet(name: &str) {
 
 ## 微信
 
-<img width="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /> <img width="180" src="./assets/lencx.png" alt="lencx-wechat-qrcode" />
+> 群二维码已过期，关注公众号《浮之静》，发送“进群”，我将拉你进群一起学习。
+
+<img height="200" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /> <img height="180" src="./assets/fzj-qrcode.png" alt="fzj-qrcode" />
 
 ## License
 

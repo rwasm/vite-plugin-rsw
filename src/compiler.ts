@@ -1,8 +1,6 @@
-import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
-import includes from 'lodash/includes';
 import { spawnSync, spawn } from 'child_process';
 
 import { isWin, debugCompiler, getCrateName } from './utils';
