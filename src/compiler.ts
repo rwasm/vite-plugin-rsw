@@ -8,7 +8,7 @@ import { spawnSync, spawn } from 'child_process';
 import { isWin, debugCompiler, getCrateName } from './utils';
 import { RswConfig, RswPluginOptions, RswCrateOptions } from './types';
 
-function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: string, sync: boolean) {
+function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: string, sync: boolean, isWatch?: boolean) {
   const {
     mode = 'dev',
     target = 'web',
@@ -46,7 +46,7 @@ function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: st
       encoding: 'utf-8',
       stdio: ['inherit', 'inherit', 'inherit'],
     })
-    checkStatus(root, rswCrate, p.status);
+    checkStatus(root, rswCrate, p.status, isWatch);
   } else {
     let p = spawn(wp, args, {
       shell: true,
@@ -54,22 +54,25 @@ function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: st
       stdio: ['inherit', 'inherit', 'inherit'],
     });
     p.on('close', code => {
-      checkStatus(root, rswCrate, code);
+      checkStatus(root, rswCrate, code, isWatch);
     });
   }
 }
 
-export function rswCompile(config: RswPluginOptions, root: string, crate?: string) {
+export function rswCompile(config: RswPluginOptions, root: string, crate?: string, isWatch?: boolean) {
   const { crates, ...opts } = config;
 
   if (crate) {
-    compileOne(opts, crate, root, true);
+    compileOne(opts, crate, root, true, isWatch);
     return;
   }
 
+  const pkgs: string[] = [];
   crates.forEach((crate) => {
-    compileOne(opts, crate, root, true);
+    compileOne(opts, crate, root, true, isWatch);
+    pkgs.push(path.resolve(root, getCrateName(crate), 'pkg'));
   })
+  rswPkgsLink(pkgs.join(' '), isWatch);
 }
 
 export function rswWatch(config: RswPluginOptions, root: string) {
@@ -93,42 +96,28 @@ export function rswWatch(config: RswPluginOptions, root: string) {
         chalk.bgBlueBright(`[rsw::event(${event})] `),
         chalk.yellow(`File ${_path}`),
       );
-      rswCompile(config, root, name);
+      rswCompile(config, root, name, true);
     });
   })
 }
 
-function rswPkgLink(root: string, crate: string) {
-  const cacheDir = path.resolve(root, 'node_modules/.rsw');
+function rswPkgsLink(pkgs: string, isWatch?: boolean) {
+  if (isWatch) return;
+  let npm = 'npm';
+  if (isWin) {
+    npm = 'npm.cmd';
+  };
 
-  const runCmd = () => {
-    let npm = 'npm';
-    if (isWin) {
-      npm = 'npm.cmd';
-    };
-    const npmArgs = ['link', path.resolve(root, crate, 'pkg')];
-    spawnSync(npm, npmArgs, {
-      shell: true,
-      cwd: process.cwd(),
-      stdio: ['inherit', 'inherit', 'inherit'],
-    });
-    fs.appendFileSync(`${cacheDir}/link`, `${crate}\n`);
-  }
-
-  const existDir = fs.existsSync(cacheDir);
-  if (!existDir) {
-    fs.mkdirSync(cacheDir);
-    runCmd();
-  }
-  const data = fs.readFileSync(`${cacheDir}/link`, { encoding: 'utf-8' }).split('\n');
-  if (includes(data, crate)) return;
-  runCmd();
+  const npmArgs = ['link', pkgs];
+  spawnSync(npm, npmArgs, {
+    shell: true,
+    cwd: process.cwd(),
+    stdio: ['inherit', 'inherit', 'inherit'],
+  });
 }
 
-function checkStatus(root: string, crate: string, status: number | null) {
+function checkStatus(root: string, crate: string, status: number | null, isWatch?: boolean) {
   if (status !== 0) {
     throw chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`);
-  } else {
-    rswPkgLink(root, crate);
   }
 }

@@ -26,7 +26,7 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     },
     configureServer(_server) {
       const root = _server?.config?.root;
-      rswCompile(userOptions, crateRoot);
+      rswCompile(userOptions, crateRoot, undefined, false);
       rswWatch(userOptions, root);
     },
     transform(code, id) {
