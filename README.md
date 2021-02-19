@@ -20,6 +20,7 @@
 ```bash
 # more: https://github.com/lencx/create-xc-app
 npx create-xc-app my-react-wasm --template wasm-react
+
 # or
 npx create-xc-app my-vue-wasm --template wasm-vue
 ```
@@ -45,6 +46,7 @@ export default defineConfig({
   plugins: [
     ViteRsw({
       mode: "release",
+      // unLinks: [],
       crates: ["@rsw/hey", "rsw-test"],
     }),
   ],
@@ -98,15 +100,15 @@ pub fn greet(name: &str) {
 
 <!-- * `root`: rust crate root path. default project root path. -->
 * `mode`
-  * `dev`: create a development build. Enable debug info, and disable optimizations.
+  * `dev`: (default) create a development build. Enable debug info, and disable optimizations.
   * `release`: create a release build. Enable optimizations and disable debug info.
 * `target`: sets the target environment.
-  * `web`: default
+  * `web`: (default)
   * `bundler`
   * `nodejs`
   * `no-modules`
-* `crates`:
-  * `string[]`: package name, support npm organization.
+* `unLinks`: `string[]` - (npm unlink) uninstalls a package.
+* `crates`: `string[]` - (npm link) package name, support npm organization.
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 

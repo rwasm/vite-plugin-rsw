@@ -6,9 +6,7 @@ export default defineConfig({
   plugins: [
     reactRefresh(),
     ViteRsw({
-      // root: '.',
       mode: 'release',
-      // target: 'web',
       crates: [
         '@rsw/hey',
         'rsw-test',

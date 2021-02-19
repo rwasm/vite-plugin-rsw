@@ -1,5 +1,6 @@
 export type RswCrateOptions = {
   name: string;
+  // other wasm-pack options
 }
 
 export type WasmFileInfo = {
@@ -15,5 +16,18 @@ export interface RswConfig {
 
 // Plugin options
 export interface RswPluginOptions extends RswConfig {
+  unLinks?: Array<string|RswCrateOptions>;
   crates: Array<string|RswCrateOptions>;
+}
+
+export type CompileOneOptions = {
+  config: RswConfig;
+  crate: string | RswCrateOptions;
+  sync: boolean;
+}
+
+export type RswCompileOptions = {
+  config: RswPluginOptions;
+  root: string;
+  crate?: string;
 }

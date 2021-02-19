@@ -12,10 +12,10 @@ const wasmMap = new Map<string, WasmFileInfo>();
 export function ViteRsw(userOptions: RswPluginOptions): Plugin {
   let config: ResolvedConfig;
   const crateRoot = path.resolve(process.cwd(), userOptions.root || '');
+  const crateList = userOptions.crates.map(i => getCrateName(i));
+
   debugConfig(userOptions);
   checkENV();
-
-  const crateList = userOptions.crates.map(i => getCrateName(i));
 
   return {
     name: 'vite-plugin-rsw',
@@ -24,10 +24,12 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     configResolved(_config) {
       config = _config;
     },
-    configureServer(_server) {
-      const root = _server?.config?.root;
-      rswCompile(userOptions, crateRoot, undefined, false);
-      rswWatch(userOptions, root);
+    configureServer() {
+      rswCompile({
+        config: userOptions,
+        root: crateRoot,
+      });
+      rswWatch(userOptions, crateRoot);
     },
     transform(code, id) {
       if (new RegExp(`(${crateList.join('|')})` + '\\/pkg/.*.js').test(id)) {

@@ -4,13 +4,11 @@ import chokidar from 'chokidar';
 import { spawnSync, spawn } from 'child_process';
 
 import { isWin, debugCompiler, getCrateName } from './utils';
-import { RswConfig, RswPluginOptions, RswCrateOptions } from './types';
+import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions } from './types';
 
-function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: string, sync: boolean, isWatch?: boolean) {
-  const {
-    mode = 'dev',
-    target = 'web',
-  } = config;
+function compileOne(options: CompileOneOptions) {
+  const { config, crate, sync } = options;
+  const { mode = 'dev', target = 'web' } = config;
 
   let wp = 'wasm-pack';
   if (isWin) {
@@ -26,8 +24,8 @@ function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: st
 
   if (rswCrate.startsWith('@')) {
     const a = rswCrate.match(/(@.*)\/(.*)/) as string[];
-    scope = a?.[1].substring(1);
-    pkgName = `${scope}__${a?.[2]}`;
+    scope = a[1].substring(1);
+    pkgName = `${scope}__${a[2]}`;
   } else {
     pkgName = rswCrate;
   }
@@ -44,7 +42,7 @@ function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: st
       encoding: 'utf-8',
       stdio: ['inherit', 'inherit', 'inherit'],
     })
-    checkStatus(root, rswCrate, p.status, isWatch);
+    checkStatus(rswCrate, p.status);
   } else {
     let p = spawn(wp, args, {
       shell: true,
@@ -52,25 +50,43 @@ function compileOne(config: RswConfig, crate: string | RswCrateOptions, root: st
       stdio: ['inherit', 'inherit', 'inherit'],
     });
     p.on('close', code => {
-      checkStatus(root, rswCrate, code, isWatch);
+      checkStatus(rswCrate, code);
     });
   }
 }
 
-export function rswCompile(config: RswPluginOptions, root: string, crate?: string, isWatch?: boolean) {
-  const { crates, ...opts } = config;
+export function rswCompile(options: RswCompileOptions) {
+  const { config, root, crate } = options;
+  const { crates, unLinks, ...opts } = config;
 
+  // watch: file change
   if (crate) {
-    compileOne(opts, crate, root, true, isWatch);
+    compileOne({ config: opts, crate, sync: true });
     return;
   }
 
-  const pkgs: string[] = [];
-  crates.forEach((crate) => {
-    compileOne(opts, crate, root, true, isWatch);
-    pkgs.push(path.resolve(root, getCrateName(crate), 'pkg'));
+  // init
+  // npm unlink
+  if (unLinks && unLinks.length > 0) {
+    rswPkgsLink(unLinks.join(' '), 'unlink');
+    console.log(chalk.bgRedBright(`[rsw::unlink]`));
+    console.log(chalk.bgBlueBright(`  ↳ ${unLinks.join(' \n  ↳ ')} `));
+  }
+  // compile & npm link
+  const pkgMap = new Map<string, string>();
+  crates.forEach((_crate) => {
+    compileOne({ config: opts, crate: _crate, sync: true });
+    // pkgs.push(path.resolve(root, getCrateName(_crate), 'pkg'));
+    pkgMap.set(getCrateName(_crate), path.resolve(root, getCrateName(_crate), 'pkg'));
   })
-  rswPkgsLink(pkgs.join(' '), isWatch);
+  rswPkgsLink(Array.from(pkgMap.values()).join(' '), 'link');
+  console.log(chalk.bgGreenBright(`[rsw::link]`))
+  pkgMap.forEach((val, key) => {
+    console.log(
+      chalk.bgBlueBright(`  ↳ ${key} `),
+      chalk.bgMagentaBright(` ${val} `)
+    );
+  })
 }
 
 export function rswWatch(config: RswPluginOptions, root: string) {
@@ -88,25 +104,24 @@ export function rswWatch(config: RswPluginOptions, root: string) {
         stabilityThreshold: 100,
         pollInterval: 10,
       },
-      usePolling: true
+      usePolling: true,
     }).on('all', (event, _path) => {
       console.log(
         chalk.bgBlueBright(`[rsw::event(${event})] `),
         chalk.yellow(`File ${_path}`),
       );
-      rswCompile(config, root, name, true);
+      rswCompile({ config, root, crate: name });
     });
   })
 }
 
-function rswPkgsLink(pkgs: string, isWatch?: boolean) {
-  if (isWatch) return;
+function rswPkgsLink(pkgs: string, type: 'link' | 'unlink') {
   let npm = 'npm';
   if (isWin) {
     npm = 'npm.cmd';
   };
 
-  const npmArgs = ['link', pkgs];
+  const npmArgs = [type, pkgs];
   spawnSync(npm, npmArgs, {
     shell: true,
     cwd: process.cwd(),
@@ -114,7 +129,7 @@ function rswPkgsLink(pkgs: string, isWatch?: boolean) {
   });
 }
 
-function checkStatus(root: string, crate: string, status: number | null, isWatch?: boolean) {
+function checkStatus(crate: string, status: number | null) {
   if (status !== 0) {
     throw chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`);
   }
