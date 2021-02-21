@@ -26,7 +26,7 @@
 
 [create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!
 
-template: `wasm-react` and `wasm-react`
+template: `wasm-vue3` and `wasm-react`
 
 ```bash
 # With NPM
@@ -66,7 +66,7 @@ export default defineConfig({
       /** uninstall: `npm unlink` */
       // unLinks: [],
       /** install: `npm link` */
-      crates: ["@rsw/hey", "rsw-test"],
+      crates: ["@rsw/hey", "wasm-test"],
     }),
   ],
 });
@@ -75,6 +75,9 @@ export default defineConfig({
 ### Step2
 
 ```bash
+# example:
+#   npm package: `cargo new --lib rsw-test`
+#   npm org    : `cargo new --lib @rsw/hey`
 cargo new --lib <crate_name>
 ```
 
