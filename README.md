@@ -1,5 +1,12 @@
 # vite-plugin-rsw
 
+[![npm](https://img.shields.io/npm/v/vite-plugin-rsw.svg)](https://www.npmjs.com/package/vite-plugin-rsw)
+[![npm downloads](https://img.shields.io/npm/dm/vite-plugin-rsw.svg)](https://npmjs.org/package/vite-plugin-rsw)
+[![vite version](https://img.shields.io/badge/Vite-^2.0.0-000000?style=flat&labelColor=646cff)](https://github.com/vitejs/vite)
+
+[![Rust](https://img.shields.io/badge/-Rust-DEA584?style=flat&logo=rust&logoColor=000000)](https://www.rust-lang.org)
+[![WebAssembly](https://img.shields.io/badge/-WebAssembly-654FF0?style=flat&logo=webassembly&logoColor=ffffff)](https://webassembly.org)
+
 > wasm-pack plugin for vite@v2
 
 ## Pre-installed
@@ -17,12 +24,21 @@
 
 ## Quick Start
 
-```bash
-# more: https://github.com/lencx/create-xc-app
-npx create-xc-app my-react-wasm --template wasm-react
+[create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!
 
-# or
-npx create-xc-app my-vue-wasm --template wasm-vue
+template: `wasm-react` and `wasm-react`
+
+```bash
+# With NPM
+npm init xc-app
+
+# With Yarn:
+yarn create xc-app
+
+# -------------------
+
+# command line options
+npm init xc-app my-wasm-app --template wasm-react
 ```
 
 ## Getting Started
@@ -45,8 +61,11 @@ import ViteRsw from "vite-plugin-rsw";
 export default defineConfig({
   plugins: [
     ViteRsw({
+      /** dev | release */
       mode: "release",
+      /** uninstall: `npm unlink` */
       // unLinks: [],
+      /** install: `npm link` */
       crates: ["@rsw/hey", "rsw-test"],
     }),
   ],
@@ -121,6 +140,7 @@ pub fn greet(name: &str) {
 ## Related List
 
 * [WebAssembly入门](https://mtc.nofwl.com/tech/post/wasm-start.html)
+* [Vite与Rust邂逅](https://mtc.nofwl.com/tech/post/vite-rust-wasm.html)
 * [Awesome WebAssembly](https://mtc.nofwl.com/awesome/wasm.html)
 
 ## 微信
