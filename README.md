@@ -23,6 +23,8 @@
   * compile
   * hot-update
 
+<img width="640" src="./assets/rsw-optimized.png" alt="rsw run">
+
 ## Quick Start
 
 [create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!

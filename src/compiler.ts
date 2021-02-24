@@ -1,7 +1,7 @@
+import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
-import fs from 'fs';
 import { spawnSync, spawn } from 'child_process';
 
 import { isWin, debugCompiler, getCrateName } from './utils';
@@ -26,7 +26,7 @@ function compileOne(options: CompileOneOptions) {
   if (rswCrate.startsWith('@')) {
     const a = rswCrate.match(/(@.*)\/(.*)/) as string[];
     scope = a[1].substring(1);
-    pkgName = `${scope}__${a[2]}`;
+    pkgName = `${scope}~${a[2]}`;
   } else {
     pkgName = rswCrate;
   }
@@ -70,10 +70,11 @@ export function rswCompile(options: RswCompileOptions) {
   // npm unlink
   if (unLinks && unLinks.length > 0) {
     rswPkgsLink(unLinks.join(' '), 'unlink');
-    console.log(chalk.bgRedBright(`[rsw::unlink]`));
+    console.log(chalk.bgRed(`[rsw::unlink]`));
     console.log(chalk.bgBlueBright(`  ↳ ${unLinks.join(' \n  ↳ ')} `));
   }
 
+  console.log();
   // compile & npm link
   const pkgMap = new Map<string, string>();
   crates.forEach((_crate) => {
@@ -89,11 +90,11 @@ export function rswCompile(options: RswCompileOptions) {
     pkgMap.set(getCrateName(_crate), pkgPath);
   })
   rswPkgsLink(Array.from(pkgMap.values()).join(' '), 'link');
-  console.log(chalk.bgGreenBright(`[rsw::link]`))
+  console.log(chalk.bgGreen(`[rsw::link]`))
   pkgMap.forEach((val, key) => {
     console.log(
       chalk.bgBlueBright(`  ↳ ${key} `),
-      chalk.bgMagentaBright(` ${val} `)
+      chalk.blueBright(` ${val} `)
     );
   })
 }
