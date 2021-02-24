@@ -1,6 +1,7 @@
 import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
+import fs from 'fs';
 import { spawnSync, spawn } from 'child_process';
 
 import { isWin, debugCompiler, getCrateName } from './utils';
@@ -72,12 +73,20 @@ export function rswCompile(options: RswCompileOptions) {
     console.log(chalk.bgRedBright(`[rsw::unlink]`));
     console.log(chalk.bgBlueBright(`  ↳ ${unLinks.join(' \n  ↳ ')} `));
   }
+
   // compile & npm link
   const pkgMap = new Map<string, string>();
   crates.forEach((_crate) => {
-    compileOne({ config: opts, crate: _crate, sync: true });
-    // pkgs.push(path.resolve(root, getCrateName(_crate), 'pkg'));
-    pkgMap.set(getCrateName(_crate), path.resolve(root, getCrateName(_crate), 'pkg'));
+    const pkgPath = path.resolve(root, getCrateName(_crate), 'pkg');
+    // vite startup optimization
+    try {
+      fs.statSync(`${pkgPath}/package.json`).isFile();
+      console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${getCrateName(_crate)}`));
+    } catch (e) {
+      compileOne({ config: opts, crate: _crate, sync: true });
+    }
+    // rust crates map
+    pkgMap.set(getCrateName(_crate), pkgPath);
   })
   rswPkgsLink(Array.from(pkgMap.values()).join(' '), 'link');
   console.log(chalk.bgGreenBright(`[rsw::link]`))

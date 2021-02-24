@@ -17,6 +17,7 @@
 
 ## Features
 
+* startup optimization
 * mode: `development build` or `release build`
 * multiple rust crate
   * compile
@@ -66,7 +67,7 @@ export default defineConfig({
       /** uninstall: `npm unlink` */
       // unLinks: [],
       /** install: `npm link` */
-      crates: ["@rsw/hey", "wasm-test"],
+      crates: ["@rsw/hey", "rsw-test"],
     }),
   ],
 });
