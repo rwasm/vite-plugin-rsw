@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import chokidar from 'chokidar';
 import { spawnSync, spawn } from 'child_process';
 
-import { isWin, debugCompiler, getCrateName } from './utils';
+import { isWin, debugCompiler, getCrateName, checkMtime } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions } from './types';
 
 function compileOne(options: CompileOneOptions) {
@@ -78,14 +78,19 @@ export function rswCompile(options: RswCompileOptions) {
   // compile & npm link
   const pkgMap = new Map<string, string>();
   crates.forEach((_crate) => {
+    const srcPath = path.resolve(root, getCrateName(_crate), 'src');
     const pkgPath = path.resolve(root, getCrateName(_crate), 'pkg');
+    const cargoPath = path.resolve(root, getCrateName(_crate), 'Cargo.toml');
+
     // vite startup optimization
-    try {
-      fs.statSync(`${pkgPath}/package.json`).isFile();
-      console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${getCrateName(_crate)}`));
-    } catch (e) {
-      compileOne({ config: opts, crate: _crate, sync: true });
-    }
+    checkMtime(
+      srcPath,
+      cargoPath,
+      `${pkgPath}/package.json`,
+      () => compileOne({ config: opts, crate: _crate, sync: true }),
+      () => console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${getCrateName(_crate)}`)),
+    );
+
     // rust crates map
     pkgMap.set(getCrateName(_crate), pkgPath);
   })

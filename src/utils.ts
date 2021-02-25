@@ -1,4 +1,5 @@
 import os from 'os';
+import fs from 'fs';
 import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
@@ -28,4 +29,50 @@ export function checkENV() {
       chalk.green('https://github.com/rustwasm/wasm-pack'),
     );
   }
+}
+
+export function checkMtime(
+  dirs: string,
+  cargoToml: string,
+  benchmarkFile: string,
+  runCallback: Function,
+  optimCallback: Function,
+) {
+  // benchmark file modified time
+  const pkgMtime = fs.statSync(benchmarkFile).mtimeMs;
+  const cargoMtime = fs.statSync(cargoToml).mtimeMs;
+  let isOptim = true;
+
+  // run wasm-pack
+  if (cargoMtime > pkgMtime) {
+    isOptim = false;
+    return runCallback();
+  }
+
+  (function dirsMtime(dir) {
+    for (let f of fs.readdirSync(dir)) {
+      const _f = fs.statSync(`${dir}/${f}`);
+
+      if (_f.isDirectory()) {
+        if (_f.mtimeMs > pkgMtime) {
+          // run wasm-pack
+          isOptim = false;
+          runCallback();
+          break;
+        } else {
+          dirsMtime(`${dir}/${f}`)
+        }
+      }
+
+      if (_f.isFile()) {
+        if (_f.mtimeMs > pkgMtime) {
+          // run wasm-pack
+          isOptim = false;
+          runCallback();
+          break;
+        }
+      }
+    }
+  })(dirs)
+  isOptim && optimCallback();
 }
