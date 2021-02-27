@@ -38,41 +38,47 @@ export function checkMtime(
   runCallback: Function,
   optimCallback: Function,
 ) {
-  // benchmark file modified time
-  const pkgMtime = fs.statSync(benchmarkFile).mtimeMs;
-  const cargoMtime = fs.statSync(cargoToml).mtimeMs;
-  let isOptim = true;
+  try {
+    // benchmark file modified time
+    const pkgMtime = fs.statSync(benchmarkFile).mtimeMs;
+    const cargoMtime = fs.statSync(cargoToml).mtimeMs;
+    let isOptim = true;
 
-  // run wasm-pack
-  if (cargoMtime > pkgMtime) {
-    isOptim = false;
-    return runCallback();
-  }
-
-  (function dirsMtime(dir) {
-    for (let f of fs.readdirSync(dir)) {
-      const _f = fs.statSync(`${dir}/${f}`);
-
-      if (_f.isDirectory()) {
-        if (_f.mtimeMs > pkgMtime) {
-          // run wasm-pack
-          isOptim = false;
-          runCallback();
-          break;
-        } else {
-          dirsMtime(`${dir}/${f}`)
-        }
-      }
-
-      if (_f.isFile()) {
-        if (_f.mtimeMs > pkgMtime) {
-          // run wasm-pack
-          isOptim = false;
-          runCallback();
-          break;
-        }
-      }
+    // run wasm-pack
+    if (cargoMtime > pkgMtime) {
+      isOptim = false;
+      return runCallback();
     }
-  })(dirs)
-  isOptim && optimCallback();
+
+    (function dirsMtime(dir) {
+      for (let f of fs.readdirSync(dir)) {
+        const _f = fs.statSync(`${dir}/${f}`);
+
+        if (_f.isDirectory()) {
+          if (_f.mtimeMs > pkgMtime) {
+            // run wasm-pack
+            isOptim = false;
+            runCallback();
+            break;
+          } else {
+            dirsMtime(`${dir}/${f}`)
+          }
+        }
+
+        if (_f.isFile()) {
+          if (_f.mtimeMs > pkgMtime) {
+            // run wasm-pack
+            isOptim = false;
+            runCallback();
+            break;
+          }
+        }
+      }
+    })(dirs)
+
+    isOptim && optimCallback();
+  } catch(e) {
+    // no such file or directory
+    runCallback();
+  }
 }
