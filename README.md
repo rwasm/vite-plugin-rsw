@@ -146,8 +146,7 @@ pub fn greet(name: &str) {
 
 ## Related List
 
-* [WebAssembly入门](https://mtc.nofwl.com/tech/post/wasm-start.html)
-* [Vite与Rust邂逅](https://mtc.nofwl.com/tech/post/vite-rust-wasm.html)
+* [前端入门 ｜ Rust 和 WebAssembly](https://lencx.github.io/book/wasm/rust_wasm_frontend.html)
 * [Awesome WebAssembly](https://mtc.nofwl.com/awesome/wasm.html)
 
 ## 微信

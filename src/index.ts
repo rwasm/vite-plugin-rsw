@@ -46,7 +46,12 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
             fileName: _name,
             source,
           });
-          return code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('${_name}')`);
+
+          // fix: fetch or URL
+          code = code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('${_name}')`);
+          code = code.replace(`new URL('${path.basename(fileId)}', import.meta.url)`, `new URL('${_name}', location.origin)`);
+
+          return code;
         }
 
         // fix: absolute path
