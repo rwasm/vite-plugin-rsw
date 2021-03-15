@@ -17,6 +17,8 @@ export interface RswConfig {
 // Plugin options
 export interface RswPluginOptions extends RswConfig {
   unLinks?: Array<string|RswCrateOptions>;
+  isLib?: boolean;
+  libRoot?: string;
   crates: Array<string|RswCrateOptions>;
 }
 

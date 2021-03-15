@@ -20,6 +20,7 @@
 
 * startup optimization
 * mode: `development build` or `release build`
+* generate npm package(library)
 * multiple rust crate
   * compile
   * hot-update
@@ -65,11 +66,10 @@ import ViteRsw from "vite-plugin-rsw";
 export default defineConfig({
   plugins: [
     ViteRsw({
-      /** dev | release */
-      mode: "release",
-      /** uninstall: `npm unlink` */
       // unLinks: [],
-      /** install: `npm link` */
+      // isLib: false,
+      // libRoot: 'libs',
+      mode: "release",
       crates: ["@rsw/hey", "rsw-test"],
     }),
   ],
@@ -134,6 +134,8 @@ pub fn greet(name: &str) {
   * `nodejs`
   * `no-modules`
 * `unLinks`: `string[]` - (npm unlink) uninstalls a package.
+* `isLib`: `boolean` - whether to generate npm package, the default value is `false`.
+* `libRoot`: `string` - the root path of the npm package, the default value is `libs`.
 * `crates`: `string[]` - (npm link) package name, support npm organization.
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`

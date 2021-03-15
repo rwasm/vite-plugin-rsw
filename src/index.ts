@@ -1,11 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import chalk from 'chalk';
 import { createHash } from 'crypto';
 import type { Plugin, ResolvedConfig } from 'vite';
 
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugConfig, checkENV, getCrateName } from './utils';
+import { debugConfig, checkENV, getCrateName, genLibs } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 
@@ -13,6 +14,8 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
   let config: ResolvedConfig;
   const crateRoot = path.resolve(process.cwd(), userOptions.root || '');
   const crateList = userOptions.crates.map(i => getCrateName(i));
+  const isLib = userOptions?.isLib || false;
+  const libRoot = userOptions?.libRoot || 'libs';
 
   debugConfig(userOptions);
   checkENV();
@@ -60,6 +63,13 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
       return code;
     },
     generateBundle() {
+      if (isLib) {
+        console.log(chalk.bgBlue(`\n\n[rsw::lib] ${libRoot}`));
+        crateList.forEach(i => {
+          genLibs(`${crateRoot}/${i}/pkg`, `${libRoot}/${i}`);
+        })
+        console.log();
+      }
       wasmMap.forEach((i: WasmFileInfo) => {
         this.emitFile({
           fileName: i.fileName,

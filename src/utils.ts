@@ -20,7 +20,7 @@ export function checkENV() {
   const wasmPack = which.sync('wasm-pack', { nothrow: true });
   if (!wasmPack) {
     console.log(
-      chalk.bold.gray('[rsw::INFO]'),
+      chalk.bold.red('[rsw::ERROR]'),
       chalk.red('Cannot find wasm-pack in your PATH. Please make sure wasm-pack is installed'),
     );
     console.log(
@@ -81,4 +81,46 @@ export function checkMtime(
     // no such file or directory
     runCallback();
   }
+}
+
+export function genLibs(src: string, dest: string) {
+  const srcExists = fs.existsSync(src);
+  if (!srcExists) return;
+
+  const exists = fs.existsSync(dest);
+  const _dest = dest.split('/');
+  if (exists) {
+    fs.rmdirSync(_dest[0], { recursive: true });
+  }
+  _dest.reduce((prev: string, next: string) => {
+    prev += `/${next}`;
+    const currDir = prev.substring(1);
+    const exists = fs.existsSync(currDir);
+    if (!exists) {
+      fs.mkdirSync(currDir);
+    }
+    return prev;
+  }, '')
+
+  const pkgInfo = fs.readFileSync(`${src}/package.json`, 'utf8');
+  const pkgJson = JSON.parse(pkgInfo);
+  const wasmFile = pkgJson.module.replace('.js', '_bg.wasm');
+  const pkgName = pkgJson.name;
+
+  fs.readdirSync(src).forEach((file) => {
+    switch (true) {
+      case file === '.gitignore': return;
+      case file === pkgJson.module: {
+        let code = fs.readFileSync(`${src}/${file}`, 'utf8');
+        if (code) {
+          code = code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('${wasmFile}')`);
+          code = code.replace(`new URL('${wasmFile}', import.meta.url)`, `new URL('${wasmFile}', location.origin)`);
+          fs.writeFileSync(`${dest}/${file}`, code);
+          console.log(chalk.greenBright(`  ↳ ${pkgName}`));
+        }
+        return;
+      }
+      default: fs.copyFileSync(`${src}/${file}`, `${dest}/${file}`);
+    }
+  });
 }
