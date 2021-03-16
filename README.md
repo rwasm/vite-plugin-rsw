@@ -25,7 +25,7 @@
   * compile
   * hot-update
 
-<img width="640" src="./assets/rsw-optimized.png" alt="rsw run">
+<img width="640" src="./assets/rsw.png" alt="rsw run">
 
 ## Quick Start
 
