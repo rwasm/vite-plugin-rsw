@@ -155,7 +155,7 @@ pub fn greet(name: &str) {
 
 > 群二维码已过期，关注公众号《浮之静》，发送“进群”，我将拉你进群一起学习。
 
-<img height="200" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /> <img height="180" src="./assets/fzj-qrcode.png" alt="fzj-qrcode" />
+<img height="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /> <img height="160" src="./assets/fzj-qrcode.png" alt="fzj-qrcode" />
 
 ## License
 

@@ -6,7 +6,7 @@ import type { Plugin, ResolvedConfig } from 'vite';
 
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugConfig, checkENV, getCrateName, genLibs } from './utils';
+import { debugConfig, checkENV, getCrateName, loadWasm, genLibs } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 
@@ -51,8 +51,7 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
           });
 
           // fix: fetch or URL
-          code = code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('${_name}')`);
-          code = code.replace(`new URL('${path.basename(fileId)}', import.meta.url)`, `new URL('${_name}', location.origin)`);
+          code = loadWasm(code, path.basename(fileId), _name);
 
           return code;
         }
@@ -64,7 +63,9 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     },
     generateBundle() {
       if (isLib) {
-        console.log(chalk.bgBlue(`\n\n[rsw::lib] ${libRoot}`));
+        console.log();
+        console.log();
+        console.log(chalk.bgBlue(`[rsw::lib] ${libRoot}`));
         crateList.forEach(i => {
           genLibs(`${crateRoot}/${i}/pkg`, `${libRoot}/${i}`);
         })

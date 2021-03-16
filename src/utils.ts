@@ -83,10 +83,18 @@ export function checkMtime(
   }
 }
 
+// load wasm: fetch or URL
+export function loadWasm(code: string, oPath: string, nPath: string) {
+  code = code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('${nPath}')`);
+  code = code.replace(`new URL('${oPath}', import.meta.url)`, `new URL('${nPath}', location.origin)`);
+  return code;
+}
+
 export function genLibs(src: string, dest: string) {
   const srcExists = fs.existsSync(src);
   if (!srcExists) return;
 
+  dest = dest.startsWith('/') ? dest.substring(1) : dest;
   const exists = fs.existsSync(dest);
   const _dest = dest.split('/');
   if (exists) {
@@ -94,7 +102,7 @@ export function genLibs(src: string, dest: string) {
   }
   _dest.reduce((prev: string, next: string) => {
     prev += `/${next}`;
-    const currDir = prev.substring(1);
+    const currDir = prev.startsWith('/') ? prev.substring(1) : prev;
     const exists = fs.existsSync(currDir);
     if (!exists) {
       fs.mkdirSync(currDir);
@@ -110,11 +118,11 @@ export function genLibs(src: string, dest: string) {
   fs.readdirSync(src).forEach((file) => {
     switch (true) {
       case file === '.gitignore': return;
+      case file === 'package-lock.json': return;
       case file === pkgJson.module: {
         let code = fs.readFileSync(`${src}/${file}`, 'utf8');
         if (code) {
-          code = code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('${wasmFile}')`);
-          code = code.replace(`new URL('${wasmFile}', import.meta.url)`, `new URL('${wasmFile}', location.origin)`);
+          code = loadWasm(code, wasmFile, wasmFile);
           fs.writeFileSync(`${dest}/${file}`, code);
           console.log(chalk.greenBright(`  ↳ ${pkgName}`));
         }
