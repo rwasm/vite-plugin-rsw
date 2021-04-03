@@ -20,7 +20,7 @@ export function checkENV() {
   const wasmPack = which.sync('wasm-pack', { nothrow: true });
   if (!wasmPack) {
     console.log(
-      chalk.bold.red('[rsw::ERROR]'),
+      chalk.bold.red('[rsw::error]'),
       chalk.red('Cannot find wasm-pack in your PATH. Please make sure wasm-pack is installed'),
     );
     console.log(

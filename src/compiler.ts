@@ -1,4 +1,3 @@
-import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
@@ -41,14 +40,14 @@ function compileOne(options: CompileOneOptions) {
       shell: true,
       cwd: rswCrate,
       encoding: 'utf-8',
-      stdio: ['inherit', 'inherit', 'inherit'],
-    })
+      stdio: 'inherit',
+    });
     checkStatus(rswCrate, p.status);
   } else {
     let p = spawn(wp, args, {
       shell: true,
       cwd: rswCrate,
-      stdio: ['inherit', 'inherit', 'inherit'],
+      stdio: 'inherit',
     });
     p.on('close', code => {
       checkStatus(rswCrate, code);
@@ -62,7 +61,7 @@ export function rswCompile(options: RswCompileOptions) {
 
   // watch: file change
   if (crate) {
-    compileOne({ config: opts, crate, sync: true });
+    compileOne({ config: opts, crate, sync: false });
     return;
   }
 
@@ -122,7 +121,7 @@ export function rswWatch(config: RswPluginOptions, root: string) {
       usePolling: true,
     }).on('all', (event, _path) => {
       console.log(
-        chalk.bgBlueBright(`[rsw::event(${event})] `),
+        chalk.blue(`[rsw::event(${event})] `),
         chalk.yellow(`File ${_path}`),
       );
       rswCompile({ config, root, crate: name });
@@ -146,6 +145,6 @@ function rswPkgsLink(pkgs: string, type: 'link' | 'unlink') {
 
 function checkStatus(crate: string, status: number | null) {
   if (status !== 0) {
-    throw chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`);
+    console.log(chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`));
   }
 }
