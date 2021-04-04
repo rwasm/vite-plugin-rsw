@@ -47,7 +47,10 @@ function compileOne(options: CompileOneOptions) {
       console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
     }
   } else {
-    exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (_, _2, stderr) => {
+    exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (err, _, stderr) => {
+      // fix: no error exit
+      if (!err) return;
+
       if (stderr) {
         console.log(chalk.red(stderr));
         console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
