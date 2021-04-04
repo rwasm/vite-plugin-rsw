@@ -49,7 +49,10 @@ function compileOne(options: CompileOneOptions) {
   } else {
     exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (err, _, stderr) => {
       // fix: no error exit
-      if (!err) return;
+      if (!err) {
+        serve && serve.ws.send({ type: 'update', updates: [] })
+        return;
+      }
 
       if (stderr) {
         console.log(chalk.red(stderr));
