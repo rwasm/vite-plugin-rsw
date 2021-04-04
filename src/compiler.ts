@@ -1,13 +1,14 @@
 import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
-import { spawnSync, spawn } from 'child_process';
+import { spawnSync, exec } from 'child_process';
+import type { ViteDevServer } from 'vite';
 
 import { isWin, debugCompiler, getCrateName, checkMtime } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions } from './types';
 
 function compileOne(options: CompileOneOptions) {
-  const { config, crate, sync } = options;
+  const { config, crate, sync, serve, filePath } = options;
   const { mode = 'dev', target = 'web' } = config;
 
   let wp = 'wasm-pack';
@@ -42,26 +43,35 @@ function compileOne(options: CompileOneOptions) {
       encoding: 'utf-8',
       stdio: 'inherit',
     });
-    checkStatus(rswCrate, p.status);
+    if (p.status !== 0) {
+      console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
+    }
   } else {
-    let p = spawn(wp, args, {
-      shell: true,
-      cwd: rswCrate,
-      stdio: 'inherit',
-    });
-    p.on('close', code => {
-      checkStatus(rswCrate, code);
+    exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (_, _2, stderr) => {
+      if (stderr) {
+        console.log(chalk.red(stderr));
+        console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
+        serve && serve.ws.send({
+          type: 'error',
+          err: {
+            plugin: 'rsw',
+            id: filePath,
+            message: `[rsw::compile::error]\n${stderr}`,
+            stack: '',
+          },
+        });
+      }
     });
   }
 }
 
 export function rswCompile(options: RswCompileOptions) {
-  const { config, root, crate } = options;
+  const { config, root, crate, serve, filePath } = options;
   const { crates, unLinks, ...opts } = config;
 
   // watch: file change
   if (crate) {
-    compileOne({ config: opts, crate, sync: false });
+    compileOne({ config: opts, crate, sync: false, serve, filePath });
     return;
   }
 
@@ -103,7 +113,7 @@ export function rswCompile(options: RswCompileOptions) {
   })
 }
 
-export function rswWatch(config: RswPluginOptions, root: string) {
+export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevServer) {
   config.crates.forEach((crate: string | RswCrateOptions) => {
     const name = getCrateName(crate);
     // One-liner for current directory
@@ -124,7 +134,7 @@ export function rswWatch(config: RswPluginOptions, root: string) {
         chalk.blue(`[rsw::event(${event})] `),
         chalk.yellow(`File ${_path}`),
       );
-      rswCompile({ config, root, crate: name });
+      rswCompile({ config, root, crate: name, serve, filePath: _path });
     });
   })
 }
@@ -143,8 +153,21 @@ function rswPkgsLink(pkgs: string, type: 'link' | 'unlink') {
   });
 }
 
-function checkStatus(crate: string, status: number | null) {
-  if (status !== 0) {
-    console.log(chalk.red(`[rsw::error] wasm-pack for crate ${crate} failed`));
+
+export interface ErrorPayload {
+  type: 'error'
+  err: {
+    [name: string]: any
+    message: string
+    stack: string
+    id?: string
+    frame?: string
+    plugin?: string
+    pluginCode?: string
+    loc?: {
+      file?: string
+      line: number
+      column: number
+    }
   }
 }

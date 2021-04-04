@@ -1,3 +1,5 @@
+import type { ViteDevServer } from 'vite';
+
 export type RswCrateOptions = {
   name: string;
   // other wasm-pack options
@@ -26,10 +28,14 @@ export type CompileOneOptions = {
   config: RswConfig;
   crate: string | RswCrateOptions;
   sync: boolean;
+  serve?: ViteDevServer;
+  filePath?: string;
 }
 
 export type RswCompileOptions = {
   config: RswPluginOptions;
   root: string;
   crate?: string;
+  serve?: ViteDevServer;
+  filePath?: string;
 }

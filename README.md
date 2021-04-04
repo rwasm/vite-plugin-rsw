@@ -21,6 +21,7 @@
 * startup optimization
 * mode: `development build` or `release build`
 * generate npm package(library)
+* `compile error` is displayed on the page(hot-update)
 * multiple rust crate
   * compile
   * hot-update

@@ -27,12 +27,12 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     configResolved(_config) {
       config = _config;
     },
-    configureServer() {
+    configureServer(serve) {
       rswCompile({
         config: userOptions,
         root: crateRoot,
       });
-      rswWatch(userOptions, crateRoot);
+      rswWatch(userOptions, crateRoot, serve);
     },
     transform(code, id) {
       if (new RegExp(`(${crateList.join('|')})` + '\\/pkg/.*.js').test(id)) {
