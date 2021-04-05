@@ -43,12 +43,14 @@ function compileOne(options: CompileOneOptions) {
       encoding: 'utf-8',
       stdio: 'inherit',
     });
+    // fix: error exit
     if (p.status !== 0) {
       console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
+      process.exit();
     }
   } else {
     exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (err, _, stderr) => {
-      // fix: no error exit
+      // fix: no error, returns
       if (!err) {
         serve && serve.ws.send({ type: 'update', updates: [] })
         return;
@@ -157,23 +159,4 @@ function rswPkgsLink(pkgs: string, type: 'link' | 'unlink') {
     cwd: process.cwd(),
     stdio: ['inherit', 'inherit', 'inherit'],
   });
-}
-
-
-export interface ErrorPayload {
-  type: 'error'
-  err: {
-    [name: string]: any
-    message: string
-    stack: string
-    id?: string
-    frame?: string
-    plugin?: string
-    pluginCode?: string
-    loc?: {
-      file?: string
-      line: number
-      column: number
-    }
-  }
 }
