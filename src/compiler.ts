@@ -4,17 +4,14 @@ import chokidar from 'chokidar';
 import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
 
-import { isWin, debugCompiler, getCrateName, checkMtime } from './utils';
+import { wpCmd, npmCmd, debugCompiler, getCrateName, checkMtime } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions } from './types';
 
 function compileOne(options: CompileOneOptions) {
   const { config, crate, sync, serve, filePath } = options;
   const { mode = 'dev', target = 'web' } = config;
 
-  let wp = 'wasm-pack';
-  if (isWin) {
-    wp = 'wasm-pack.exe';
-  }
+  const wp = wpCmd();
   const args = ['build', `--${mode}`, '--target', target];
 
   let rswCrate: string;
@@ -52,7 +49,7 @@ function compileOne(options: CompileOneOptions) {
     exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (err, _, stderr) => {
       // fix: no error, returns
       if (!err) {
-        serve && serve.ws.send({ type: 'update', updates: [] })
+        serve && serve.ws.send({ type: 'update', updates: [] });
         return;
       }
 
@@ -148,15 +145,11 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
 }
 
 function rswPkgsLink(pkgs: string, type: 'link' | 'unlink') {
-  let npm = 'npm';
-  if (isWin) {
-    npm = 'npm.cmd';
-  };
-
+  const npm = npmCmd();
   const npmArgs = [type, pkgs];
   spawnSync(npm, npmArgs, {
     shell: true,
     cwd: process.cwd(),
-    stdio: ['inherit', 'inherit', 'inherit'],
+    stdio: 'inherit',
   });
 }

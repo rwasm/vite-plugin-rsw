@@ -12,6 +12,10 @@ export const debugCompiler = debug('rsw:compiler');
 
 export const isWin = os.platform() === 'win32';
 
+export const wpCmd = () => isWin ? 'wasm-pack.exe' : 'wasm-pack';
+
+export const npmCmd = () => isWin ? 'npm.cmd' : 'npm';
+
 export const getCrateName = (crate: string | RswCrateOptions): string => (
   typeof crate === 'object' ? crate.name : crate
 );
