@@ -104,15 +104,8 @@ export function genLibs(src: string, dest: string) {
   if (exists) {
     fs.rmdirSync(_dest[0], { recursive: true });
   }
-  _dest.reduce((prev: string, next: string) => {
-    prev += `/${next}`;
-    const currDir = prev.startsWith('/') ? prev.substring(1) : prev;
-    const exists = fs.existsSync(currDir);
-    if (!exists) {
-      fs.mkdirSync(currDir);
-    }
-    return prev;
-  }, '')
+
+  fs.mkdirSync(dest, { recursive: true });
 
   const pkgInfo = fs.readFileSync(`${src}/package.json`, 'utf8');
   const pkgJson = JSON.parse(pkgInfo);
@@ -135,4 +128,23 @@ export function genLibs(src: string, dest: string) {
       default: fs.copyFileSync(`${src}/${file}`, `${dest}/${file}`);
     }
   });
+}
+
+export function fmtMsg(content: string) {
+  return content.split('\n').map((line) => {
+    /**
+     *   Compiling crate
+     *  -->
+     * 2 | code
+     *   = note:
+     * warning:
+     * error:
+     * help:
+     */
+    return line.replace(/^\s+-->|\s+\=|[\s\d]+\|/, v => chalk.blue(v))
+      .replace(/^\s+Compiling/, v => chalk.bold.green(v))
+      .replace(/^warning/, v => chalk.bold.yellow(v))
+      .replace(/^error/, v => chalk.bold.red(v))
+      .replace(/^help/, v => chalk.bold.cyan(v));
+  }).join('\n');
 }

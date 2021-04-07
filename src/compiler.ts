@@ -4,7 +4,7 @@ import chokidar from 'chokidar';
 import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
 
-import { wpCmd, npmCmd, debugCompiler, getCrateName, checkMtime } from './utils';
+import { wpCmd, npmCmd, debugCompiler, getCrateName, checkMtime, fmtMsg } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions } from './types';
 
 function compileOne(options: CompileOneOptions) {
@@ -54,7 +54,7 @@ function compileOne(options: CompileOneOptions) {
       }
 
       if (stderr) {
-        console.log(chalk.red(stderr));
+        console.log(fmtMsg(stderr));
         console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
         serve && serve.ws.send({
           type: 'error',
