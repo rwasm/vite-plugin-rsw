@@ -3,7 +3,6 @@ import fs from 'fs';
 import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
-
 import { RswCrateOptions } from './types';
 
 export const debugStart = debug('rsw:start');
@@ -130,7 +129,7 @@ export function genLibs(src: string, dest: string) {
   });
 }
 
-export function fmtMsg(content: string) {
+export function fmtMsg(content: string, isTag: boolean = false) {
   return content.split('\n').map((line) => {
     /**
      *   Compiling crate
@@ -141,10 +140,178 @@ export function fmtMsg(content: string) {
      * error:
      * help:
      */
+    if (isTag) {
+      return line.replace(/^\s+-->|\s+\=|[\s\d]+\|/, v => `<code class="rsw-line">${v}</code>`)
+        .replace(/^\s+Compiling/, v => `<code class="rsw-green">${v}</code>`)
+        .replace(/^warning/, v => `<code class="rsw-warn">${v}</code>`)
+        .replace(/^error/, v => `<code class="rsw-error">${v}</code>`)
+        .replace(/^help/, v => `<code class="rsw-help">${v}</code>`);
+    }
     return line.replace(/^\s+-->|\s+\=|[\s\d]+\|/, v => chalk.blue(v))
       .replace(/^\s+Compiling/, v => chalk.bold.green(v))
       .replace(/^warning/, v => chalk.bold.yellow(v))
       .replace(/^error/, v => chalk.bold.red(v))
       .replace(/^help/, v => chalk.bold.cyan(v));
   }).join('\n');
+}
+
+export function devCode(code: string) {
+  const rswOverlay = `
+const template = \`
+<style>
+:host {
+  position: fixed;
+  z-index: 99999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.66);
+  --monospace: 'SFMono-Regular', Consolas,
+              'Liberation Mono', Menlo, Courier, monospace;
+  --red: #ff5555;
+  --green: #26cb7c;
+  --yellow: #e2aa53;
+  --purple: #cfa4ff;
+  --cyan: #2dd9da;
+  --dim: #c9c9c9;
+  --blue: #3884ff;
+}
+.window {
+  font-family: var(--monospace);
+  line-height: 1.5;
+  width: 800px;
+  color: #d8d8d8;
+  margin: 30px auto;
+  padding: 25px 40px;
+  position: relative;
+  background: #181818;
+  border-radius: 6px 6px 8px 8px;
+  box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+  overflow: hidden;
+  border-top: 8px solid var(--red);
+}
+pre {
+  font-family: var(--monospace);
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 1em;
+  overflow-x: scroll;
+  scrollbar-width: none;
+}
+pre::-webkit-scrollbar {
+  display: none;
+}
+.message {
+  line-height: 1.3;
+  white-space: pre-wrap;
+  color: #8a7652;
+}
+.plugin {
+  color: var(--purple);
+  font-weight: bold;
+}
+.file {
+  color: var(--green);
+  margin: 8px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: #000;
+  padding: 4px 10px;
+}
+.tip {
+  font-size: 13px;
+  color: #999;
+  border-top: 1px dotted #999;
+  padding-top: 13px;
+}
+code {
+  font-size: 13px;
+  font-family: var(--monospace);
+  font-weight: bold;
+}
+.rsw-line {
+  color: var(--blue);
+}
+.rsw-green {
+  color: var(--green);
+}
+.rsw-error {
+  color: var(--red);
+}
+.rsw-warn {
+  color: var(--yellow);
+}
+.rsw-help {
+  color: var(--cyan);
+}
+.file-link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+</style>
+<div class="window">
+  <span class="plugin"></span>
+  <pre class="file"></pre>
+  <pre class="message"></pre>
+  <div class="tip">
+    [rsw::error] This error occurred during the build time. Click outside or fix the code to dismiss.
+  </div>
+</div>
+\`;
+export class ErrorOverlay extends HTMLElement {
+  constructor(payload) {
+    super()
+    this.root = this.attachShadow({ mode: 'open' });
+    this.root.innerHTML = template;
+    this.text('.message', payload.message.trim());
+    this.text('.plugin', payload.plugin.trim());
+    this.text('.file', payload.id.trim());
+
+    this.root.querySelector('.window').addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    this.addEventListener('click', () => {
+      this.close();
+    });
+  }
+
+  text(selector, text) {
+    const el = this.root.querySelector(selector);
+    if (el) el.innerHTML = text;
+  }
+
+  close() {
+    if (this.parentNode) this.parentNode.removeChild(this);
+  }
+}
+
+const overlayId = 'vite-rsw-error-overlay';
+customElements.define(overlayId, ErrorOverlay);
+
+function createErrorOverlay(err) {
+  clearErrorOverlay();
+  document.body.appendChild(new ErrorOverlay(err));
+}
+
+function clearErrorOverlay() {
+  document
+    .querySelectorAll(overlayId)
+    .forEach((n) => n.close());
+}
+`
+  const rswHot = `
+if (import.meta.hot) {
+  import.meta.hot.on('rsw-error', (data) => {
+    createErrorOverlay(data);
+    console.log("%c%s", "color: #e2aa53; background: #000", \`\${data.plugin} \${data.id}\`);
+    console.log("%c%s", "color: #ff5555; background: #000", \`\${data.console}\`);
+  })
+  import.meta.hot.on('rsw-error-close', (data) => {
+    window.location.reload();
+  })
+}`;
+  return rswOverlay + rswHot + code;
 }

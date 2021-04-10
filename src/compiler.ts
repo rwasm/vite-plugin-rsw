@@ -49,20 +49,22 @@ function compileOne(options: CompileOneOptions) {
     exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (err, _, stderr) => {
       // fix: no error, returns
       if (!err) {
-        serve && serve.ws.send({ type: 'update', updates: [] });
+        serve && serve.ws.send({ type: 'custom', event: 'rsw-error-close' });
         return;
       }
 
       if (stderr) {
         console.log(fmtMsg(stderr));
         console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
+
         serve && serve.ws.send({
-          type: 'error',
-          err: {
-            plugin: 'rsw',
+          type: 'custom',
+          event: 'rsw-error',
+          data: {
+            plugin: '[vite::rsw]',
+            message: fmtMsg(stderr, true),
             id: filePath,
-            message: `[rsw::compile::error]\n${stderr}`,
-            stack: '',
+            console: stderr,
           },
         });
       }

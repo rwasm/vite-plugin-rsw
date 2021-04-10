@@ -6,7 +6,7 @@ import type { Plugin, ResolvedConfig } from 'vite';
 
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugConfig, checkENV, getCrateName, loadWasm, genLibs } from './utils';
+import { debugConfig, checkENV, getCrateName, loadWasm, genLibs, devCode } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 
@@ -56,8 +56,8 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
           return code;
         }
 
-        // fix: absolute path
-        return code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('/${fileId}')`);
+        // wasm file path and compiler error handling
+        return devCode(code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('/${fileId}')`));
       }
       return code;
     },
