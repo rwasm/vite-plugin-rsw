@@ -6,7 +6,7 @@ import type { Plugin, ResolvedConfig } from 'vite';
 
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugConfig, checkENV, getCrateName, loadWasm, genLibs, devCode } from './utils';
+import { debugConfig, checkENV, getCrateName, loadWasm, genLibs, rswOverlay, rswHot } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 
@@ -52,14 +52,17 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
 
           // fix: fetch or URL
           code = loadWasm(code, path.basename(fileId), _name);
-
           return code;
         }
 
-        // wasm file path and compiler error handling
-        return devCode(code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('/${fileId}')`));
+        // wasm file path and rsw hot
+        return code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('/${fileId}')`) + rswHot;
       }
       return code;
+    },
+    transformIndexHtml(html) {
+      // compiler error overlay
+      return html.replace('</html>', `<script>${rswOverlay}</script></html>`);
     },
     generateBundle() {
       if (isLib) {

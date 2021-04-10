@@ -155,9 +155,20 @@ export function fmtMsg(content: string, isTag: boolean = false) {
   }).join('\n');
 }
 
-export function devCode(code: string) {
-  const rswOverlay = `
-const template = \`
+export const rswHot = `
+if (import.meta.hot) {
+  import.meta.hot.on('rsw-error', (data) => {
+    createRswErrorOverlay(data);
+    console.log("%c%s", "color: #e2aa53; background: #000", \`\${data.plugin} \${data.id}\`);
+    console.log("%c%s", "color: #ff5555; background: #000", \`\${data.console}\`);
+  })
+  import.meta.hot.on('rsw-error-close', (data) => {
+    window.location.reload();
+  })
+}`;
+
+export const rswOverlay = `
+const rswTemplate = \`
 <style>
 :host {
   position: fixed;
@@ -207,7 +218,8 @@ pre::-webkit-scrollbar {
 .message {
   line-height: 1.3;
   white-space: pre-wrap;
-  color: #8a7652;
+  color: #c78e2a;
+  font-size: 14px;
 }
 .plugin {
   color: var(--purple);
@@ -220,6 +232,8 @@ pre::-webkit-scrollbar {
   word-break: break-all;
   background: #000;
   padding: 4px 10px;
+  font-size: 14px;
+  font-weight: bold;
 }
 .tip {
   font-size: 13px;
@@ -257,15 +271,15 @@ code {
   <pre class="file"></pre>
   <pre class="message"></pre>
   <div class="tip">
-    [rsw::error] This error occurred during the build time. Click outside or fix the code to dismiss.
+    [rsw::error] This error occurred during the build time, click outside or fix the code to dismiss.
   </div>
 </div>
 \`;
-export class ErrorOverlay extends HTMLElement {
+class RswErrorOverlay extends HTMLElement {
   constructor(payload) {
     super()
     this.root = this.attachShadow({ mode: 'open' });
-    this.root.innerHTML = template;
+    this.root.innerHTML = rswTemplate;
     this.text('.message', payload.message.trim());
     this.text('.plugin', payload.plugin.trim());
     this.text('.file', payload.id.trim());
@@ -288,30 +302,19 @@ export class ErrorOverlay extends HTMLElement {
   }
 }
 
-const overlayId = 'vite-rsw-error-overlay';
-customElements.define(overlayId, ErrorOverlay);
+const overlayRswId = 'vite-rsw-error-overlay';
+customElements.define(overlayRswId, RswErrorOverlay);
 
-function createErrorOverlay(err) {
-  clearErrorOverlay();
-  document.body.appendChild(new ErrorOverlay(err));
+function createRswErrorOverlay(err) {
+  clearRswErrorOverlay();
+  document.body.appendChild(new RswErrorOverlay(err));
 }
 
-function clearErrorOverlay() {
+function clearRswErrorOverlay() {
   document
-    .querySelectorAll(overlayId)
+    .querySelectorAll(overlayRswId)
     .forEach((n) => n.close());
 }
-`
-  const rswHot = `
-if (import.meta.hot) {
-  import.meta.hot.on('rsw-error', (data) => {
-    createErrorOverlay(data);
-    console.log("%c%s", "color: #e2aa53; background: #000", \`\${data.plugin} \${data.id}\`);
-    console.log("%c%s", "color: #ff5555; background: #000", \`\${data.console}\`);
-  })
-  import.meta.hot.on('rsw-error-close', (data) => {
-    window.location.reload();
-  })
-}`;
-  return rswOverlay + rswHot + code;
-}
+
+window.createRswErrorOverlay = createRswErrorOverlay;
+`;
