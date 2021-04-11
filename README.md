@@ -5,6 +5,7 @@
 [![vite version](https://img.shields.io/badge/Vite-^2.0.0-000000?style=flat&labelColor=646cff)](https://github.com/vitejs/vite)
 [![chat](https://img.shields.io/badge/chat-discord-blue?style=flat&logo=discord)](https://discord.gg/euyYWXTwmk)
 
+[![awesome-rsw](./assets/awesome-rsw.svg)](https://github.com/lencx/awesome-rsw)
 [![Rust](https://img.shields.io/badge/-Rust-DEA584?style=flat&logo=rust&logoColor=000000)](https://www.rust-lang.org)
 [![WebAssembly](https://img.shields.io/badge/-WebAssembly-654FF0?style=flat&logo=webassembly&logoColor=ffffff)](https://webassembly.org)
 
@@ -21,12 +22,14 @@
 * startup optimization
 * mode: `development build` or `release build`
 * generate npm package(library)
-* `compile error` is displayed on the page(hot-update)
+* `compile error` output friendly in the browser(hot-update)
 * multiple rust crate
   * compile
   * hot-update
 
 <img width="640" src="./assets/rsw.png" alt="rsw run">
+
+<img width="640" src="./assets/rsw-error.png" alt="rsw error">
 
 ## Quick Start
 
