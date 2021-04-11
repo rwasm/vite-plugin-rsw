@@ -141,13 +141,13 @@ export function fmtMsg(content: string, isTag: boolean = false) {
      * help:
      */
     if (isTag) {
-      return line.replace(/^\s+-->|\s+\=|[\s\d]+\|/, v => `<code class="rsw-line">${v}</code>`)
+      return line.replace(/^\s+-->|\s+\=(\snote)?|[\s\d]+\|/, v => `<code class="rsw-line">${v}</code>`)
         .replace(/^\s+Compiling/, v => `<code class="rsw-green">${v}</code>`)
         .replace(/^warning/, v => `<code class="rsw-warn">${v}</code>`)
         .replace(/^error/, v => `<code class="rsw-error">${v}</code>`)
         .replace(/^help/, v => `<code class="rsw-help">${v}</code>`);
     }
-    return line.replace(/^\s+-->|\s+\=|[\s\d]+\|/, v => chalk.blue(v))
+    return line.replace(/^\s+-->|\s+\=(\snote)?|[\s\d]+\|/, v => chalk.blue(v))
       .replace(/^\s+Compiling/, v => chalk.bold.green(v))
       .replace(/^warning/, v => chalk.bold.yellow(v))
       .replace(/^error/, v => chalk.bold.red(v))
@@ -159,8 +159,7 @@ export const rswHot = `
 if (import.meta.hot) {
   import.meta.hot.on('rsw-error', (data) => {
     createRswErrorOverlay(data);
-    console.log("%c%s", "color: #e2aa53; background: #000", \`\${data.plugin} \${data.id}\`);
-    console.log("%c%s", "color: #ff5555; background: #000", \`\${data.console}\`);
+    throw \`\n🦀\${data.plugin} ~> \${data.id}\n\n\${data.console}\`
   })
   import.meta.hot.on('rsw-error-close', (data) => {
     window.location.reload();
@@ -218,7 +217,7 @@ pre::-webkit-scrollbar {
 .message {
   line-height: 1.3;
   white-space: pre-wrap;
-  color: #c78e2a;
+  color: #6d7878;
   font-size: 14px;
 }
 .plugin {
@@ -230,10 +229,10 @@ pre::-webkit-scrollbar {
   margin: 8px 0;
   white-space: pre-wrap;
   word-break: break-all;
-  background: #000;
-  padding: 4px 10px;
   font-size: 14px;
   font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
 }
 .tip {
   font-size: 13px;
@@ -275,6 +274,7 @@ code {
   </div>
 </div>
 \`;
+
 class RswErrorOverlay extends HTMLElement {
   constructor(payload) {
     super()
@@ -303,7 +303,9 @@ class RswErrorOverlay extends HTMLElement {
 }
 
 const overlayRswId = 'vite-rsw-error-overlay';
-customElements.define(overlayRswId, RswErrorOverlay);
+if (!customElements.get(overlayRswId)) {
+  customElements.define(overlayRswId, RswErrorOverlay);
+}
 
 function createRswErrorOverlay(err) {
   clearRswErrorOverlay();
