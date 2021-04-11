@@ -62,7 +62,10 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     },
     transformIndexHtml(html) {
       // compiler error overlay
-      return html.replace('</html>', `<script>${rswOverlay}</script></html>`);
+      if (config?.mode === 'development') {
+        return html.replace('</html>', `<script>${rswOverlay}</script></html>`);
+      }
+      return html;
     },
     generateBundle() {
       if (isLib) {
