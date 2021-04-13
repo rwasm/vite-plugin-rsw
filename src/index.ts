@@ -41,7 +41,7 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
         const fileId = _path?.[1].replace(/^\//, '') + '_bg.wasm';
 
         // build wasm file
-        if (!wasmMap.has(fileId) && config?.mode !== 'development') {
+        if (!wasmMap.has(fileId) && config?.command !== 'serve') {
           const source = fs.readFileSync(path.resolve(crateRoot, fileId));
           const hash = createHash('md5').update(String(source)).digest('hex').substring(0, 8);
           const _name = config?.build?.assetsDir + '/' + path.basename(fileId).replace('.wasm', `.${hash}.wasm`);
@@ -51,12 +51,12 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
           });
 
           // fix: fetch or URL
-          code = loadWasm(code, path.basename(fileId), _name);
+          code = loadWasm(code, path.basename(fileId), config.base + _name);
           return code;
         }
 
         // wasm file path and rsw hot
-        return code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('/${fileId}')`) + rswHot;
+        return code.replace(/import\.meta\.url\.replace\(\/\\\\\.js\$\/, \\'_bg\.wasm\\'\);/, `fetch('/${fileId}')`) + rswHot;
       }
       return code;
     },
