@@ -88,6 +88,12 @@ export function checkMtime(
 
 // load wasm: fetch or URL
 export function loadWasm(code: string, oPath: string, nPath: string) {
+  console.log(
+    chalk.bold.blue('\n[rsw::build]'),
+    chalk.yellow(oPath),
+    `~>`,
+    chalk.green(nPath),
+  );
   code = code.replace('import.meta.url.replace(/\\.js$/, \'_bg.wasm\');', `fetch('${nPath}')`);
   code = code.replace(`new URL('${oPath}', import.meta.url)`, `new URL('${nPath}', location.origin)`);
   return code;

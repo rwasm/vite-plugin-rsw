@@ -69,8 +69,7 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     },
     generateBundle() {
       if (isLib) {
-        console.log();
-        console.log();
+        console.log('\n\n');
         console.log(chalk.bgBlue(`[rsw::lib] ${libRoot}`));
         crateList.forEach(i => {
           genLibs(`${crateRoot}/${i}/pkg`, `${libRoot}/${i}`);
