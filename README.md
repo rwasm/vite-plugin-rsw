@@ -70,6 +70,7 @@ import ViteRsw from "vite-plugin-rsw";
 export default defineConfig({
   plugins: [
     ViteRsw({
+      // root: '',
       // unLinks: [],
       // isLib: false,
       // libRoot: 'libs',
@@ -128,7 +129,7 @@ pub fn greet(name: &str) {
 
 ## Plugin Options
 
-<!-- * `root`: rust crate root path. default project root path. -->
+* `root`: rust crate root path. default project root path.
 * `mode`
   * `dev`: (default) create a development build. Enable debug info, and disable optimizations.
   * `release`: create a release build. Enable optimizations and disable debug info.

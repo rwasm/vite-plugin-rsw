@@ -30,6 +30,7 @@ export type CompileOneOptions = {
   sync: boolean;
   serve?: ViteDevServer;
   filePath?: string;
+  root?: string;
 }
 
 export type RswCompileOptions = {

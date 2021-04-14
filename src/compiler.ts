@@ -8,7 +8,7 @@ import { wpCmd, npmCmd, debugCompiler, getCrateName, checkMtime, fmtMsg } from '
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions } from './types';
 
 function compileOne(options: CompileOneOptions) {
-  const { config, crate, sync, serve, filePath } = options;
+  const { config, crate, sync, serve, filePath, root = '' } = options;
   const { mode = 'dev', target = 'web' } = config;
 
   const wp = wpCmd();
@@ -33,10 +33,12 @@ function compileOne(options: CompileOneOptions) {
 
   debugCompiler('Running subprocess with command:', wp, args.join(' '));
 
+  const crateRoot = root + rswCrate;
+
   if (sync) {
     let p = spawnSync(wp, args, {
       shell: true,
-      cwd: rswCrate,
+      cwd: crateRoot,
       encoding: 'utf-8',
       stdio: 'inherit',
     });
@@ -46,7 +48,7 @@ function compileOne(options: CompileOneOptions) {
       process.exit();
     }
   } else {
-    exec(`${wp} ${args.join(' ')}`, { cwd: rswCrate }, (err, _, stderr) => {
+    exec(`${wp} ${args.join(' ')}`, { cwd: crateRoot }, (err, _, stderr) => {
       // fix: no error, returns
       if (!err) {
         serve && serve.ws.send({ type: 'custom', event: 'rsw-error-close' });
@@ -78,7 +80,7 @@ export function rswCompile(options: RswCompileOptions) {
 
   // watch: file change
   if (crate) {
-    compileOne({ config: opts, crate, sync: false, serve, filePath });
+    compileOne({ config: opts, crate, sync: false, serve, filePath, root });
     return;
   }
 
@@ -103,7 +105,7 @@ export function rswCompile(options: RswCompileOptions) {
       srcPath,
       cargoPath,
       `${pkgPath}/package.json`,
-      () => compileOne({ config: opts, crate: _crate, sync: true }),
+      () => compileOne({ config: opts, crate: _crate, sync: true, root }),
       () => console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${getCrateName(_crate)}`)),
     );
 
