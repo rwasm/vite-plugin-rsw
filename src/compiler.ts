@@ -33,7 +33,8 @@ function compileOne(options: CompileOneOptions) {
 
   debugCompiler('Running subprocess with command:', wp, args.join(' '));
 
-  const crateRoot = root + rswCrate;
+  // rust crates: custom path
+  const crateRoot = path.resolve(root, rswCrate);
 
   if (sync) {
     let p = spawnSync(wp, args, {
