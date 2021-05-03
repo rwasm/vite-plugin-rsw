@@ -5,7 +5,7 @@ import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
 
 import { wpCmd, npmCmd, debugCompiler, getCrateName, checkMtime, fmtMsg } from './utils';
-import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions } from './types';
+import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType } from './types';
 
 function compileOne(options: CompileOneOptions) {
   const { config, crate, sync, serve, filePath, root = '' } = options;
@@ -28,7 +28,7 @@ function compileOne(options: CompileOneOptions) {
     pkgName = rswCrate;
   }
 
-  args.push('--out-name', pkgName)
+  args.push('--out-name', pkgName);
   if (scope) args.push('--scope', scope);
 
   debugCompiler('Running subprocess with command:', wp, args.join(' '));
@@ -76,7 +76,7 @@ function compileOne(options: CompileOneOptions) {
 }
 
 export function rswCompile(options: RswCompileOptions) {
-  const { config, root, crate, serve, filePath } = options;
+  const { config, root, crate, serve, filePath, npmType = 'link' } = options;
   const { crates, unLinks, ...opts } = config;
 
   // watch: file change
@@ -113,8 +113,8 @@ export function rswCompile(options: RswCompileOptions) {
     // rust crates map
     pkgMap.set(getCrateName(_crate), pkgPath);
   })
-  rswPkgsLink(Array.from(pkgMap.values()).join(' '), 'link');
-  console.log(chalk.bgGreen(`[rsw::link]`))
+  rswPkgsLink(Array.from(pkgMap.values()).join(' '), npmType);
+  console.log(chalk.bgGreen(`[rsw::${npmType}]`))
   pkgMap.forEach((val, key) => {
     console.log(
       chalk.bgBlueBright(`  ↳ ${key} `),
@@ -149,7 +149,7 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
   })
 }
 
-function rswPkgsLink(pkgs: string, type: 'link' | 'unlink') {
+function rswPkgsLink(pkgs: string, type: NpmCmdType) {
   const npm = npmCmd();
   const npmArgs = [type, pkgs];
   spawnSync(npm, npmArgs, {

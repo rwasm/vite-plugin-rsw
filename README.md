@@ -145,6 +145,22 @@ pub fn greet(name: &str) {
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
+## Error
+
+* npm ERR! EEXIST: file already exists
+
+  ```bash
+  # https://docs.npmjs.com/cli/v6/commands/npm-link
+  # npm link uses the global prefix (see npm prefix -g for its value)
+  # /Users/lencx/.nvm/versions/node/v15.6.0
+  npm prefix -g
+
+  # after removing the folder, try again `npm run dev`
+  rm -rf /Users/lencx/.nvm/versions/node/v15.6.0/lib/node_modules/@rsw/chasm
+  ```
+
+  ![rsw-link-error](./assets/rsw-link-error.png)
+
 ## Examples
 
 * [react](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/react)

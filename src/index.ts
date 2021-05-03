@@ -36,9 +36,8 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     },
     transform(code, id) {
       if (new RegExp(`(${crateList.join('|')})` + '\\/pkg/.*.js').test(id)) {
-        const re = id.indexOf('@') > 0 ? '([@\\/].*)' : '';
-        const _path = id.match(new RegExp(`.*(.*${re}([\\/].*){3}).js$`)) as string[];
-        const fileId = _path?.[1].replace(/^\//, '') + '_bg.wasm';
+        const filename = path.basename(id);
+        const fileId = id.replace(filename, filename.replace('.js', '_bg.wasm'));
 
         // build wasm file
         if (!wasmMap.has(fileId) && config?.command !== 'serve') {

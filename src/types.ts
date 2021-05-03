@@ -33,10 +33,13 @@ export type CompileOneOptions = {
   root?: string;
 }
 
+export type NpmCmdType = 'install' | 'link' | 'unlink';
+
 export type RswCompileOptions = {
   config: RswPluginOptions;
   root: string;
   crate?: string;
   serve?: ViteDevServer;
   filePath?: string;
+  npmType?: NpmCmdType;
 }
