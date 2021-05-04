@@ -22,7 +22,7 @@
 * startup optimization
 * mode: `development build` or `release build`
 * generate npm package(library)
-* `compile error` output friendly in the browser(hot-update)
+* friendly error message: browser and terminal
 * multiple rust crate
   * compile
   * hot-update
@@ -30,6 +30,10 @@
 <img width="640" src="./assets/rsw.png" alt="rsw run">
 
 <img width="640" src="./assets/rsw-error.png" alt="rsw error">
+
+<img width="480" src="./assets/rsw-error-wasm-pack.png" alt="rsw error wasm-pack">
+
+<img width="480" src="./assets/rsw-error-outdir.png" alt="rsw error outdir">
 
 ## Quick Start
 
@@ -64,8 +68,8 @@ yarn add -D vite-plugin-rsw
 
 ```js
 // vite.config.ts
-import { defineConfig } from "vite";
-import ViteRsw from "vite-plugin-rsw";
+import { defineConfig } from 'vite';
+import ViteRsw from 'vite-plugin-rsw';
 
 export default defineConfig({
   plugins: [
@@ -74,8 +78,14 @@ export default defineConfig({
       // unLinks: [],
       // isLib: false,
       // libRoot: 'libs',
-      mode: "release",
-      crates: ["@rsw/hey", "rsw-test"],
+      mode: 'release',
+      crates: [
+        '@rsw/hey',
+        'rsw-test',
+        // https://github.com/lencx/vite-plugin-rsw/issues/8#issuecomment-820281861
+        // outDir: use `path.resolve` or relative path.
+        { name: '@rsw/hello', outDir: 'custom/path' },
+      ],
     }),
   ],
 });
@@ -141,7 +151,9 @@ pub fn greet(name: &str) {
 * `unLinks`: `string[]` - (npm unlink) uninstalls a package.
 * `isLib`: `boolean` - whether to generate npm package, the default value is `false`.
 * `libRoot`: `string` - the root path of the npm package, the default value is `libs`.
-* `crates`: `string[]` - (npm link) package name, support npm organization.
+* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L30) - (npm link) package name, support npm organization.
+  * *Item as string* - `'@rsw/hello'`
+  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path' }`
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
@@ -159,7 +171,7 @@ pub fn greet(name: &str) {
   rm -rf /Users/lencx/.nvm/versions/node/v15.6.0/lib/node_modules/@rsw/chasm
   ```
 
-  ![rsw-link-error](./assets/rsw-link-error.png)
+  ![rsw-error-link](./assets/rsw-error-link.png)
 
 ## Examples
 

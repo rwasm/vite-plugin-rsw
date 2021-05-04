@@ -2,6 +2,7 @@ import type { ViteDevServer } from 'vite';
 
 export type RswCrateOptions = {
   name: string;
+  outDir?: string;
   // other wasm-pack options
 }
 
@@ -31,6 +32,7 @@ export type CompileOneOptions = {
   serve?: ViteDevServer;
   filePath?: string;
   root?: string;
+  outDir?: string;
 }
 
 export type NpmCmdType = 'install' | 'link' | 'unlink';
@@ -42,4 +44,5 @@ export type RswCompileOptions = {
   serve?: ViteDevServer;
   filePath?: string;
   npmType?: NpmCmdType;
+  cratePathMap?: Map<string, string>;
 }

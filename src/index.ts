@@ -6,16 +6,23 @@ import type { Plugin, ResolvedConfig } from 'vite';
 
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugConfig, checkENV, getCrateName, loadWasm, genLibs, rswOverlay, rswHot } from './utils';
+import { debugConfig, checkENV, getCrateName, getCratePath, loadWasm, genLibs, rswOverlay, rswHot } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
+const cratePathMap = new Map<string, string>();
 
 export function ViteRsw(userOptions: RswPluginOptions): Plugin {
   let config: ResolvedConfig;
   const crateRoot = path.resolve(process.cwd(), userOptions.root || '');
-  const crateList = userOptions.crates.map(i => getCrateName(i));
+  userOptions.crates.map((i) => {
+    const _name = typeof i === 'string' ? i : i.name;
+    if (!cratePathMap.has(_name)) {
+      cratePathMap.set(_name, getCratePath(i, crateRoot));
+    }
+  });
   const isLib = userOptions?.isLib || false;
   const libRoot = userOptions?.libRoot || 'libs';
+  const re = Array.from(cratePathMap.values()).map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
 
   debugConfig(userOptions);
   checkENV();
@@ -31,11 +38,12 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
       rswCompile({
         config: userOptions,
         root: crateRoot,
+        cratePathMap,
       });
-      rswWatch(userOptions, crateRoot, serve);
+      rswWatch(userOptions, crateRoot, serve, cratePathMap);
     },
     transform(code, id) {
-      if (new RegExp(`(${crateList.join('|')})` + '\\/pkg/.*.js').test(id)) {
+      if (new RegExp(`(${re})`).test(id)) {
         const filename = path.basename(id);
         const fileId = id.replace(filename, filename.replace('.js', '_bg.wasm'));
 
@@ -70,8 +78,8 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
       if (isLib) {
         console.log('\n\n');
         console.log(chalk.bgBlue(`[rsw::lib] ${libRoot}`));
-        crateList.forEach(i => {
-          genLibs(`${crateRoot}/${i}/pkg`, `${libRoot}/${i}`);
+        Array.from(cratePathMap.keys()).forEach(i => {
+          genLibs(cratePathMap?.get(i) || '', `${libRoot}/${i}`);
         })
         console.log();
       }

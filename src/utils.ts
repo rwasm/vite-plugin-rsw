@@ -1,5 +1,6 @@
 import os from 'os';
 import fs from 'fs';
+import path from 'path';
 import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
@@ -10,6 +11,7 @@ export const debugConfig = debug('rsw:config');
 export const debugCompiler = debug('rsw:compiler');
 
 export const isWin = os.platform() === 'win32';
+export const userRoot = process.env.HOME || '';
 
 export const wpCmd = () => isWin ? 'wasm-pack.exe' : 'wasm-pack';
 
@@ -19,12 +21,34 @@ export const getCrateName = (crate: string | RswCrateOptions): string => (
   typeof crate === 'object' ? crate.name : crate
 );
 
+export const getCratePath = (crate: string | RswCrateOptions, crateRoot: string): string => {
+  const _name = (crate as RswCrateOptions).name;
+  const _root = path.join(crateRoot, _name ? _name : (crate as string));
+  if (typeof crate === 'object' && crate.outDir) {
+    if (new RegExp(`^${userRoot.replace('/', '\\/')}`).test(crate.outDir)) {
+      return crate.outDir;
+    }
+    if (!crate.outDir.startsWith('/')) {
+      return path.resolve(_root, crate.outDir);
+    } else {
+      console.log(
+        chalk.bold.red('[rsw::error]'),
+        chalk.red('Invalid outDir ~> Please use `path.resolve` or relative path.'),
+        chalk.red(`\n\`${JSON.stringify(crate, null, 2)}\`\n`),
+      );
+      process.exit();
+    }
+  }
+
+  return path.resolve(_root, 'pkg');
+};
+
 export function checkENV() {
   const wasmPack = which.sync('wasm-pack', { nothrow: true });
   if (!wasmPack) {
     console.log(
       chalk.bold.red('[rsw::error]'),
-      chalk.red('Cannot find wasm-pack in your PATH. Please make sure wasm-pack is installed'),
+      chalk.red('Cannot find wasm-pack in your PATH. Please make sure wasm-pack is installed.'),
     );
     console.log(
       chalk.bold.gray('[rsw::INFO]'),
@@ -94,7 +118,7 @@ export function loadWasm(code: string, oPath: string, nPath: string) {
     `~>`,
     chalk.green(nPath),
   );
-  code = code.replace(/import\.meta\.url\.replace\(\/\\\\\.js\$\/, \\'_bg\.wasm\\'\);/, `fetch('${nPath}')`);
+  code = code.replace(/import\.meta\.url\.replace\(\/\\\\\.js\$\/, \\'_bg\.wasm\\'\);/, `fetch('${nPath}', {headers:{'Content-Type':'application/wasm'}})`);
   code = code.replace(`new URL('${oPath}',`, `new URL('${nPath}',`);
   code = code.replace(/, import\.meta\.url\)/, `, location.origin)`);
   return code;

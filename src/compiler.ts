@@ -8,7 +8,7 @@ import { wpCmd, npmCmd, debugCompiler, getCrateName, checkMtime, fmtMsg } from '
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType } from './types';
 
 function compileOne(options: CompileOneOptions) {
-  const { config, crate, sync, serve, filePath, root = '' } = options;
+  const { config, crate, sync, serve, filePath, root = '', outDir } = options;
   const { mode = 'dev', target = 'web' } = config;
 
   const wp = wpCmd();
@@ -30,6 +30,7 @@ function compileOne(options: CompileOneOptions) {
 
   args.push('--out-name', pkgName);
   if (scope) args.push('--scope', scope);
+  if (outDir) args.push('--out-dir', outDir);
 
   debugCompiler('Running subprocess with command:', wp, args.join(' '));
 
@@ -45,7 +46,7 @@ function compileOne(options: CompileOneOptions) {
     });
     // fix: error exit
     if (p.status !== 0) {
-      console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
+      console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed.`));
       process.exit();
     }
   } else {
@@ -58,7 +59,7 @@ function compileOne(options: CompileOneOptions) {
 
       if (stderr) {
         console.log(fmtMsg(stderr));
-        console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed`));
+        console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed.`));
 
         serve && serve.ws.send({
           type: 'custom',
@@ -76,12 +77,12 @@ function compileOne(options: CompileOneOptions) {
 }
 
 export function rswCompile(options: RswCompileOptions) {
-  const { config, root, crate, serve, filePath, npmType = 'link' } = options;
+  const { config, root, crate, serve, filePath, npmType = 'link', cratePathMap } = options;
   const { crates, unLinks, ...opts } = config;
 
   // watch: file change
   if (crate) {
-    compileOne({ config: opts, crate, sync: false, serve, filePath, root });
+    compileOne({ config: opts, crate, sync: false, serve, filePath, root, outDir: cratePathMap?.get(crate) });
     return;
   }
 
@@ -97,21 +98,22 @@ export function rswCompile(options: RswCompileOptions) {
   // compile & npm link
   const pkgMap = new Map<string, string>();
   crates.forEach((_crate) => {
-    const srcPath = path.resolve(root, getCrateName(_crate), 'src');
-    const pkgPath = path.resolve(root, getCrateName(_crate), 'pkg');
-    const cargoPath = path.resolve(root, getCrateName(_crate), 'Cargo.toml');
+    const _name = getCrateName(_crate);
+    const srcPath = path.resolve(root, _name, 'src');
+    const outDir = cratePathMap?.get(_name) || '';
+    const cargoPath = path.resolve(root, _name, 'Cargo.toml');
 
     // vite startup optimization
     checkMtime(
       srcPath,
       cargoPath,
-      `${pkgPath}/package.json`,
-      () => compileOne({ config: opts, crate: _crate, sync: true, root }),
-      () => console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${getCrateName(_crate)}`)),
+      `${outDir}/package.json`,
+      () => compileOne({ config: opts, crate: _crate, sync: true, root, outDir: cratePathMap?.get(_name) }),
+      () => console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${_name}.`)),
     );
 
     // rust crates map
-    pkgMap.set(getCrateName(_crate), pkgPath);
+    pkgMap.set(_name, outDir);
   })
   rswPkgsLink(Array.from(pkgMap.values()).join(' '), npmType);
   console.log(chalk.bgGreen(`[rsw::${npmType}]`))
@@ -123,7 +125,7 @@ export function rswCompile(options: RswCompileOptions) {
   })
 }
 
-export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevServer) {
+export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevServer, cratePathMap: Map<string, string>) {
   config.crates.forEach((crate: string | RswCrateOptions) => {
     const name = getCrateName(crate);
     // One-liner for current directory
@@ -144,7 +146,7 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
         chalk.blue(`[rsw::event(${event})] `),
         chalk.yellow(`File ${_path}`),
       );
-      rswCompile({ config, root, crate: name, serve, filePath: _path });
+      rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
     });
   })
 }
