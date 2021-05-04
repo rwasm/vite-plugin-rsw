@@ -118,7 +118,7 @@ export function loadWasm(code: string, oPath: string, nPath: string) {
     `~>`,
     chalk.green(nPath),
   );
-  code = code.replace(/import\.meta\.url\.replace\(\/\\\\\.js\$\/, \\'_bg\.wasm\\'\);/, `fetch('${nPath}', {headers:{'Content-Type':'application/wasm'}})`);
+  code = code.replace(/import\.meta\.url\.replace\(\/\\\\\.js\$\/, \\'_bg\.wasm\\'\);/, `fetch('${nPath}')`);
   code = code.replace(`new URL('${oPath}',`, `new URL('${nPath}',`);
   code = code.replace(/, import\.meta\.url\)/, `, location.origin)`);
   return code;
