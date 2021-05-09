@@ -4,7 +4,7 @@ import chokidar from 'chokidar';
 import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
 
-import { wpCmd, npmCmd, debugCompiler, getCrateName, checkMtime, fmtMsg } from './utils';
+import { wpCmd, npmCmd, debugRsw, getCrateName, checkMtime, fmtMsg } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType } from './types';
 
 function compileOne(options: CompileOneOptions) {
@@ -32,7 +32,7 @@ function compileOne(options: CompileOneOptions) {
   if (scope) args.push('--scope', scope);
   if (outDir) args.push('--out-dir', outDir);
 
-  debugCompiler('Running subprocess with command:', wp, args.join(' '));
+  debugRsw(`[wasm-pack build]: ${args.join(' ')}`);
 
   // rust crates: custom path
   const crateRoot = path.resolve(root, rswCrate);
@@ -90,8 +90,11 @@ export function rswCompile(options: RswCompileOptions) {
   // npm unlink
   if (unLinks && unLinks.length > 0) {
     rswPkgsLink(unLinks.join(' '), 'unlink');
-    console.log(chalk.bgRed(`[rsw::unlink]`));
-    console.log(chalk.bgBlueBright(`  ↳ ${unLinks.join(' \n  ↳ ')} `));
+    console.log();
+    console.log(
+      chalk.red(`\n[rsw::unlink]`),
+      chalk.blue(`  ↳ ${unLinks.join(' \n  ↳ ')} \n`)
+    );
   }
 
   console.log();
@@ -116,13 +119,14 @@ export function rswCompile(options: RswCompileOptions) {
     pkgMap.set(_name, outDir);
   })
   rswPkgsLink(Array.from(pkgMap.values()).join(' '), npmType);
-  console.log(chalk.bgGreen(`[rsw::${npmType}]`))
+  console.log(chalk.green(`\n[rsw::${npmType}]`));
   pkgMap.forEach((val, key) => {
     console.log(
-      chalk.bgBlueBright(`  ↳ ${key} `),
-      chalk.blueBright(` ${val} `)
+      chalk.yellow(`  ↳ ${key} `),
+      chalk.blue(` ${val} `)
     );
-  })
+  });
+  console.log();
 }
 
 export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevServer, cratePathMap: Map<string, string>) {

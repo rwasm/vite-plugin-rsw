@@ -6,9 +6,7 @@ import debug from 'debug';
 import chalk from 'chalk';
 import { RswCrateOptions } from './types';
 
-export const debugStart = debug('rsw:start');
-export const debugConfig = debug('rsw:config');
-export const debugCompiler = debug('rsw:compiler');
+export const debugRsw = debug('rsw');
 
 export const isWin = os.platform() === 'win32';
 export const userRoot = process.env.HOME || '';

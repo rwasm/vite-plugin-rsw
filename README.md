@@ -17,22 +17,61 @@
 * [nodejs](https://nodejs.org)
 * [wasm-pack](https://github.com/rustwasm/wasm-pack)
 
+## Remote deployment project
+
+Use [lencx/rsw-node](https://github.com/lencx/rsw-node)
+
+```bash
+# install rsw
+npm i -D rsw-node
+
+# or
+yarn add -D rsw-node
+```
+
+For example:
+
+* [learn-wasm/package.json](https://github.com/lencx/learn-wasm/blob/main/package.json#L7)
+
+  ```json
+  "scripts": {
+    "rsw:deploy": "rsw && npm run build"
+  }
+  ```
+
+* [learn-wasm/.rswrc.json](https://github.com/lencx/learn-wasm/blob/main/.rswrc.json)
+
+  ```json
+  {
+    "root": ".",
+    "crates": [
+      "@rsw/chasm",
+      "@rsw/game-of-life",
+      "@rsw/excel-read"
+    ]
+  }
+  ```
+
+* [learn-wasm/.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
+
+![rsw deploy](./assets/rsw-deploy.png)
+
 ## Features
 
 * startup optimization
 * mode: `development build` or `release build`
+* enable debub mode: `DEBUG=rsw yarn dev`
 * generate npm package(library)
 * friendly error message: browser and terminal
 * multiple rust crate
   * compile
   * hot-update
 
-<img width="640" src="./assets/rsw.png" alt="rsw run">
+![rsw run](./assets/rsw.png)
+![rsw error](./assets/rsw-error.png)
+![rsw debug](./assets/rsw-debug.png)
 
-<img width="640" src="./assets/rsw-error.png" alt="rsw error">
-
-<img width="480" src="./assets/rsw-error-wasm-pack.png" alt="rsw error wasm-pack">
-
+<img width="480" src="./assets/rsw-error-wasm-pack.png" alt="rsw error wasm-pack">\
 <img width="480" src="./assets/rsw-error-outdir.png" alt="rsw error outdir">
 
 ## Quick Start
@@ -78,7 +117,7 @@ export default defineConfig({
       // unLinks: [],
       // isLib: false,
       // libRoot: 'libs',
-      mode: 'release',
+      mode: 'dev',
       crates: [
         '@rsw/hey',
         'rsw-test',

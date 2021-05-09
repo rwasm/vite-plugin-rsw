@@ -6,7 +6,7 @@ import type { Plugin, ResolvedConfig } from 'vite';
 
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugConfig, checkENV, getCrateName, getCratePath, loadWasm, genLibs, rswOverlay, rswHot } from './utils';
+import { debugRsw, checkENV, getCratePath, loadWasm, genLibs, rswOverlay, rswHot } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 const cratePathMap = new Map<string, string>();
@@ -24,7 +24,9 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
   const libRoot = userOptions?.libRoot || 'libs';
   const re = Array.from(cratePathMap.values()).map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
 
-  debugConfig(userOptions);
+  debugRsw(`[process.cwd]: ${process.cwd()}`);
+  debugRsw(`[crateRoot]: ${crateRoot}`);
+  debugRsw(`[userOptions]: ${JSON.stringify(userOptions, null, 2)}`, );
   checkENV();
 
   return {
@@ -45,6 +47,7 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     transform(code, id) {
       if (new RegExp(`(${re})`).test(id)) {
         const filename = path.basename(id);
+        debugRsw(`[fileID]: ${id}`);
         const fileId = id.replace(filename, filename.replace('.js', '_bg.wasm'));
 
         // build wasm file
@@ -77,7 +80,7 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     generateBundle() {
       if (isLib) {
         console.log('\n\n');
-        console.log(chalk.bgBlue(`[rsw::lib] ${libRoot}`));
+        console.log(chalk.blue(`[rsw::lib] ${libRoot}`));
         Array.from(cratePathMap.keys()).forEach(i => {
           genLibs(cratePathMap?.get(i) || '', `${libRoot}/${i}`);
         })
