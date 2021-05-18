@@ -170,17 +170,17 @@ export function fmtMsg(content: string, isTag: boolean = false) {
      * help:
      */
     if (isTag) {
-      return line.replace(/^\s+-->|\s+\=(\snote)?|[\s\d]+\|/, v => `<code class="rsw-line">${v}</code>`)
-        .replace(/^\s+Compiling/, v => `<code class="rsw-green">${v}</code>`)
-        .replace(/^warning/, v => `<code class="rsw-warn">${v}</code>`)
-        .replace(/^error/, v => `<code class="rsw-error">${v}</code>`)
-        .replace(/^help/, v => `<code class="rsw-help">${v}</code>`);
+      return line.replace(/(^\s+-->|\s+\=(\snote)?|[\s\d]+\|)/, `<code class="rsw-line">$1</code>`)
+        .replace(/(^\s+Compiling)/, `<code class="rsw-green">$1</code>`)
+        .replace(/(^warning)/, `<code class="rsw-warn">$1</code>`)
+        .replace(/(^error)/, `<code class="rsw-error">$1</code>`)
+        .replace(/(^help)/, `<code class="rsw-help">$1</code>`);
     }
-    return line.replace(/^\s+-->|\s+\=(\snote)?|[\s\d]+\|/, v => chalk.blue(v))
-      .replace(/^\s+Compiling/, v => chalk.bold.green(v))
-      .replace(/^warning/, v => chalk.bold.yellow(v))
-      .replace(/^error/, v => chalk.bold.red(v))
-      .replace(/^help/, v => chalk.bold.cyan(v));
+    return line.replace(/(^\s+-->|\s+\=(\snote)?|[\s\d]+\|)/, chalk.blue('$1'))
+      .replace(/(^\s+Compiling)/, chalk.bold.green('$1'))
+      .replace(/(^warning)/, chalk.bold.yellow('$1'))
+      .replace(/(^error)/, chalk.bold.red('$1'))
+      .replace(/(^help)/, chalk.bold.cyan('$1'));
   }).join('\n');
 }
 
