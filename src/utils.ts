@@ -4,7 +4,12 @@ import path from 'path';
 import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
+import { execFileSync } from 'child_process';
 import { RswCrateOptions } from './types';
+
+const nodeBin = process.argv[0];
+
+export const sleep = (time: number) => execFileSync(nodeBin, ['-e', `setTimeout(function() {}, ${time});`]);
 
 export const debugRsw = debug('rsw');
 

@@ -1,11 +1,14 @@
 import path from 'path';
 import chalk from 'chalk';
 import chokidar from 'chokidar';
+import { readFileSync } from 'fs';
 import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
 
-import { wpCmd, npmCmd, debugRsw, getCrateName, checkMtime, fmtMsg } from './utils';
+import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime, fmtMsg } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType } from './types';
+
+const cacheMap = new Map();
 
 function compileOne(options: CompileOneOptions) {
   const { config, crate, sync, serve, filePath, root = '', outDir } = options;
@@ -80,6 +83,55 @@ export function rswCompile(options: RswCompileOptions) {
   const { config, root, crate, serve, filePath, npmType = 'link', cratePathMap } = options;
   const { crates, unLinks, ...opts } = config;
 
+  const pkgsLink = (isRun: boolean = true) => {
+    // compile & npm link
+    const pkgMap = new Map<string, string>();
+    crates.forEach((_crate) => {
+      const _name = getCrateName(_crate);
+      const srcPath = path.resolve(root, _name, 'src');
+      const outDir = cratePathMap?.get(_name) || '';
+      const cargoPath = path.resolve(root, _name, 'Cargo.toml');
+
+      // vite startup optimization
+      isRun && checkMtime(
+        srcPath,
+        cargoPath,
+        `${outDir}/package.json`,
+        () => compileOne({ config: opts, crate: _crate, sync: true, root, outDir: cratePathMap?.get(_name) }),
+        () => console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${_name}.`)),
+      );
+
+      // rust crates map
+      pkgMap.set(_name, outDir);
+    })
+    rswPkgsLink(Array.from(pkgMap.values()).join(' '), npmType);
+    console.log(chalk.green(`\n[rsw::${npmType}]`));
+    pkgMap.forEach((val, key) => {
+      console.log(
+        chalk.yellow(`  ↳ ${key} `),
+        chalk.blue(` ${val} `)
+      );
+    });
+    console.log();
+  }
+
+  // package.json dependency changes, re-run `npm link`.
+  const pkgJson = path.resolve(root, 'package.json');
+  if (filePath === pkgJson) {
+    const oData = cacheMap.get('pkgJson');
+    const data = readFileSync(pkgJson, { encoding: 'utf-8' })
+    const jsonData = JSON.parse(data);
+    const nData = JSON.stringify({ ...(jsonData.dependencies || {}), ...(jsonData.devDependencies || {}) })
+
+    if (oData !== nData) {
+      console.log(chalk.blue(`\n[rsw::relink]`));
+      sleep(1000);
+      pkgsLink(false);
+      cacheMap.set('pkgJson', nData);
+    }
+    return;
+  }
+
   // watch: file change
   if (crate) {
     compileOne({ config: opts, crate, sync: false, serve, filePath, root, outDir: cratePathMap?.get(crate) });
@@ -98,58 +150,22 @@ export function rswCompile(options: RswCompileOptions) {
   }
 
   console.log();
-  // compile & npm link
-  const pkgMap = new Map<string, string>();
-  crates.forEach((_crate) => {
-    const _name = getCrateName(_crate);
-    const srcPath = path.resolve(root, _name, 'src');
-    const outDir = cratePathMap?.get(_name) || '';
-    const cargoPath = path.resolve(root, _name, 'Cargo.toml');
-
-    // vite startup optimization
-    checkMtime(
-      srcPath,
-      cargoPath,
-      `${outDir}/package.json`,
-      () => compileOne({ config: opts, crate: _crate, sync: true, root, outDir: cratePathMap?.get(_name) }),
-      () => console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${_name}.`)),
-    );
-
-    // rust crates map
-    pkgMap.set(_name, outDir);
-  })
-  rswPkgsLink(Array.from(pkgMap.values()).join(' '), npmType);
-  console.log(chalk.green(`\n[rsw::${npmType}]`));
-  pkgMap.forEach((val, key) => {
-    console.log(
-      chalk.yellow(`  ↳ ${key} `),
-      chalk.blue(` ${val} `)
-    );
-  });
-  console.log();
+  pkgsLink();
 }
 
 export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevServer, cratePathMap: Map<string, string>) {
+  watch([path.resolve(root, 'package.json')], (_path) => {
+    rswCompile({ config, root, serve, filePath: _path, cratePathMap });
+  });
+
   config.crates.forEach((crate: string | RswCrateOptions) => {
     const name = getCrateName(crate);
     // One-liner for current directory
     // https://github.com/paulmillr/chokidar
-    chokidar.watch([
+    watch([
       path.resolve(root, name, 'src'),
       path.resolve(root, name, 'Cargo.toml'),
-    ], {
-      ignoreInitial: true,
-      ignored: ['**/node_modules/**', '**/.git/**', '**/target/**'],
-      awaitWriteFinish: {
-        stabilityThreshold: 100,
-        pollInterval: 10,
-      },
-      usePolling: true,
-    }).on('all', (event, _path) => {
-      console.log(
-        chalk.blue(`[rsw::event(${event})] `),
-        chalk.yellow(`File ${_path}`),
-      );
+    ], (_path) => {
       rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
     });
   })
@@ -162,5 +178,23 @@ function rswPkgsLink(pkgs: string, type: NpmCmdType) {
     shell: true,
     cwd: process.cwd(),
     stdio: 'inherit',
+  });
+}
+
+function watch(args: string[], callback: (path: string) => void) {
+  chokidar.watch(args, {
+    ignoreInitial: true,
+    ignored: ['**/node_modules/**', '**/.git/**', '**/target/**'],
+    awaitWriteFinish: {
+      stabilityThreshold: 100,
+      pollInterval: 10,
+    },
+    usePolling: true,
+  }).on('all', (event, _path) => {
+    console.log(
+      chalk.blue(`[rsw::file::${event}] `),
+      chalk.yellow(`File ${_path}`),
+    );
+    callback(_path);
   });
 }
