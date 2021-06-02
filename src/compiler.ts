@@ -5,7 +5,8 @@ import { readFileSync } from 'fs';
 import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
 
-import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime, fmtMsg } from './utils';
+import rustError from './rserr';
+import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType } from './types';
 
 const cacheMap = new Map();
@@ -61,7 +62,8 @@ function compileOne(options: CompileOneOptions) {
       }
 
       if (stderr) {
-        console.log(fmtMsg(stderr));
+        const { msgTag, msgCmd } = rustError(stderr);
+        console.log(msgCmd);
         console.log(chalk.red(`[rsw::error] wasm-pack for crate ${rswCrate} failed.`));
 
         serve && serve.ws.send({
@@ -69,7 +71,7 @@ function compileOne(options: CompileOneOptions) {
           event: 'rsw-error',
           data: {
             plugin: '[vite::rsw]',
-            message: fmtMsg(stderr, true),
+            message: msgTag,
             id: filePath,
             console: stderr,
           },

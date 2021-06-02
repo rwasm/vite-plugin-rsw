@@ -6,7 +6,8 @@ import type { Plugin, ResolvedConfig } from 'vite';
 
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugRsw, checkENV, getCratePath, loadWasm, genLibs, rswOverlay, rswHot } from './utils';
+import { debugRsw, checkENV, getCratePath, loadWasm, genLibs } from './utils';
+import { rswOverlay, rswHot } from './overlay';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 const cratePathMap = new Map<string, string>();
