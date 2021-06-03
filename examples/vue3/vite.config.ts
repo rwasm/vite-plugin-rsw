@@ -7,7 +7,6 @@ export default defineConfig({
   plugins: [
     vue(),
     ViteRsw({
-      mode: 'release',
       crates: [
         '@rsw/hey',
         'rsw-test',
