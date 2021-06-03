@@ -126,39 +126,3 @@ export function loadWasm(code: string, oPath: string, nPath: string) {
   code = code.replace(/, import\.meta\.url\)/, `, location.origin)`);
   return code;
 }
-
-export function genLibs(src: string, dest: string) {
-  const srcExists = fs.existsSync(src);
-  if (!srcExists) return;
-
-  dest = dest.startsWith('/') ? dest.substring(1) : dest;
-  const exists = fs.existsSync(dest);
-  const _dest = dest.split('/');
-  if (exists) {
-    fs.rmdirSync(_dest[0], { recursive: true });
-  }
-
-  fs.mkdirSync(dest, { recursive: true });
-
-  const pkgInfo = fs.readFileSync(`${src}/package.json`, 'utf8');
-  const pkgJson = JSON.parse(pkgInfo);
-  const wasmFile = pkgJson.module.replace('.js', '_bg.wasm');
-  const pkgName = pkgJson.name;
-
-  fs.readdirSync(src).forEach((file) => {
-    switch (true) {
-      case file === '.gitignore': return;
-      case file === 'package-lock.json': return;
-      case file === pkgJson.module: {
-        let code = fs.readFileSync(`${src}/${file}`, 'utf8');
-        if (code) {
-          code = loadWasm(code, wasmFile, wasmFile);
-          fs.writeFileSync(`${dest}/${file}`, code);
-          console.log(chalk.greenBright(`  ↳ ${pkgName}`));
-        }
-        return;
-      }
-      default: fs.copyFileSync(`${src}/${file}`, `${dest}/${file}`);
-    }
-  });
-}

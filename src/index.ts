@@ -1,13 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 import { createHash } from 'crypto';
 import type { Plugin, ResolvedConfig } from 'vite';
 
+import { rswOverlay, rswHot } from './overlay';
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugRsw, checkENV, getCratePath, loadWasm, genLibs } from './utils';
-import { rswOverlay, rswHot } from './overlay';
+import { debugRsw, checkENV, getCratePath, loadWasm } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 const cratePathMap = new Map<string, string>();
@@ -21,8 +20,6 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
       cratePathMap.set(_name, getCratePath(i, crateRoot));
     }
   });
-  const isLib = userOptions?.isLib || false;
-  const libRoot = userOptions?.libRoot || 'libs';
   const re = Array.from(cratePathMap.values()).map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
 
   debugRsw(`[process.cwd]: ${process.cwd()}`);
@@ -79,14 +76,6 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
       return html;
     },
     generateBundle() {
-      if (isLib) {
-        console.log('\n\n');
-        console.log(chalk.blue(`[rsw::lib] ${libRoot}`));
-        Array.from(cratePathMap.keys()).forEach(i => {
-          genLibs(cratePathMap?.get(i) || '', `${libRoot}/${i}`);
-        })
-        console.log();
-      }
       wasmMap.forEach((i: WasmFileInfo) => {
         this.emitFile({
           fileName: i.fileName,

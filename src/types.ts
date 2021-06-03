@@ -13,15 +13,11 @@ export type WasmFileInfo = {
 
 export interface RswConfig {
   root?: string; // default: project root
-  mode?: 'dev' | 'release';
-  target?: 'web' | 'bundler' | 'nodejs' | 'no-modules';
 }
 
 // Plugin options
 export interface RswPluginOptions extends RswConfig {
   unLinks?: Array<string|RswCrateOptions>;
-  isLib?: boolean;
-  libRoot?: string;
   crates: Array<string|RswCrateOptions>;
 }
 

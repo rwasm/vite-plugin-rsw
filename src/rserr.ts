@@ -1,86 +1,77 @@
-// Rust Error StateMachine
-
 import chalk from 'chalk';
 
-class MsgState {
-  type: string;
-  color: string;
-  reg: RegExp;
+class RustError {
+  // current line
+  line: string;
+  // current index
+  index: number;
+  // browser display
+  msgTagGroup: string[];
+  // terminal display
+  msgCmdGroup: string[];
 
-  constructor(type: string, color: string, reg: RegExp) {
-    this.type = type;
-    this.color = color;
-    this.reg = reg;
+  constructor() {
+    this.line = '';
+    this.index = -1;
+    this.msgTagGroup = [];
+    this.msgCmdGroup = [];
   }
-  handleTag(context: MsgContext) {
-    context.setTag(this);
-  }
-  handleCmd(context: MsgContext) {
-    context.setCmd(this);
-  }
-  handleAll(context: MsgContext) {
-    context.setAll(this);
-  }
-}
 
-class MsgContext {
-  msgTag: string;
-  msgCmd: string;
-  constructor(message: string) {
-    this.msgTag = message;
-    this.msgCmd = message;
+  init(line: string, index: number) {
+    this.line = line;
+    this.index= index;
+    this.msgTagGroup[index] = line;
+    this.msgCmdGroup[index] = line;
+    return this;
   }
-  setTag(state: MsgState) {
-    this.msgTag = this.msgTag.replace(state.reg, `<code class="rsw-${state.type}">$1</code>`);
+
+  setTag(type: string, reg: RegExp) {
+    if (new RegExp(reg).test(this.line)) {
+      this.msgTagGroup[this.index] = this.line.replace(reg, `<code class="rsw-${type}">$1</code>`);
+    }
   }
-  setCmd(state: MsgState) {
-    this.msgCmd = this.msgCmd.replace(state.reg, (chalk.bold as any)[state.color]('$1'));
+
+  setCmd(color: string, reg: RegExp) {
+    if (new RegExp(reg).test(this.line)) {
+      this.msgCmdGroup[this.index] = this.line.replace(reg, (chalk.bold as any)[color]('$1'));
+    }
   }
-  setAll(state: MsgState) {
-    this.setTag(state);
-    this.setCmd(state);
+
+  handle(type: string, color: string, reg: RegExp) {
+    this.setTag(type, reg);
+    this.setCmd(color, reg);
+    return this;
   }
-  getTag() {
-    return this.msgTag;
-  }
-  getCmd() {
-    return this.msgCmd;
-  }
-  getAll() {
+
+  getValue() {
     return {
-      msgTag: this.msgTag,
-      msgCmd: this.msgCmd,
+      msgTag: this.msgTagGroup.join('\n'),
+      msgCmd: this.msgCmdGroup.join('\n'),
     };
   }
 }
 
-export default function rustError(content: string) {
-  let msgTags: string[] = [];
-  let msgCmds: string[] = [];
+export default function fmtRustError(content: string) {
+  const rsIns = new RustError();
+  /**
+   *   Compiling crate
+   *  -->
+   * 2 | code  error
+   * 3 |       ^^^^^
+   *   = note:
+   * warning:
+   * error:
+   * error[E0425]:
+   * help:
+   */
+  content.split('\n').forEach((line, index) => {
+    rsIns.init(line, index)
+      .handle('line', 'blue', /(^\s+-->|\s*=|[\s\d]*\|)/)
+      .handle('compiling', 'green', /(^\s+Compiling)/)
+      .handle('error', 'red', /(^error(\[\w+\])?)/)
+      .handle('warn', 'yellow', /(^warning)/)
+      .handle('help', 'cyan', /(^help)/);
+  });
 
-  content.split('\n').map(i => {
-    const init = new MsgContext(i);
-    /**
-     *   Compiling crate
-     *  -->
-     * 2 | code
-     *   = note:
-     * warning:
-     * error:
-     * error[E0425]:
-     * help:
-     */
-    new MsgState('line', 'blue', /(^\s+-->|\s+\=|[\s\d]+\|)/).handleAll(init);
-    new MsgState('compiling', 'green', /(^\s+Compiling)/).handleAll(init);
-    new MsgState('error', 'red', /(^error(\[\w+\])?)/).handleAll(init);
-    new MsgState('warn', 'yellow', /(^warning)/).handleAll(init);
-    new MsgState('help', 'cyan', /(^help)/).handleAll(init);
-    const { msgTag, msgCmd } = init.getAll();
-    msgTags.push(msgTag);
-    msgCmds.push(msgCmd);
-  })
-  return {
-    msgTag: msgTags.join('\n'),
-    msgCmd: msgCmds.join('\n'),
-  };
+  return rsIns.getValue();
 }

@@ -19,19 +19,23 @@
 
 ## Remote deployment project
 
-Use [lencx/rsw-node](https://github.com/lencx/rsw-node)
+### Install
+
+Install [lencx/rsw-node](https://github.com/lencx/rsw-node) globally, you can use the `rsw` command.
 
 ```bash
-# install rsw
-npm i -D rsw-node
-
-# or
-yarn add -D rsw-node
+npm i -g rsw-node
 ```
 
-For example:
+<img width="480" src="./assets/rsw-node-help.png" alt="rsw help">
 
-* [learn-wasm/package.json](https://github.com/lencx/learn-wasm/blob/main/package.json#L7)
+## Example
+
+* [learn-wasm/package.json](https://github.com/lencx/learn-wasm/blob/main/package.json)
+
+```bash
+npm install -D rsw-node
+```
 
   ```json
   "scripts": {
@@ -59,9 +63,7 @@ For example:
 ## Features
 
 * startup optimization
-* mode: `development build` or `release build`
-* enable debub mode: `DEBUG=rsw yarn dev`
-* generate npm package(library)
+* enable debug mode: `DEBUG=rsw yarn dev`
 * friendly error message: browser and terminal
 * multiple rust crate
   * compile
@@ -113,11 +115,6 @@ import ViteRsw from 'vite-plugin-rsw';
 export default defineConfig({
   plugins: [
     ViteRsw({
-      // root: '',
-      // unLinks: [],
-      // isLib: false,
-      // libRoot: 'libs',
-      mode: 'dev',
       crates: [
         '@rsw/hey',
         'rsw-test',
@@ -179,18 +176,8 @@ pub fn greet(name: &str) {
 ## Plugin Options
 
 * `root`: rust crate root path. default project root path.
-* `mode`
-  * `dev`: (default) create a development build. Enable debug info, and disable optimizations.
-  * `release`: create a release build. Enable optimizations and disable debug info.
-* `target`: sets the target environment.
-  * `web`: (default)
-  * `bundler`
-  * `nodejs`
-  * `no-modules`
 * `unLinks`: `string[]` - (npm unlink) uninstalls a package.
-* `isLib`: `boolean` - whether to generate npm package, the default value is `false`.
-* `libRoot`: `string` - the root path of the npm package, the default value is `libs`.
-* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L30) - (npm link) package name, support npm organization.
+* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L26) - (npm link) package name, support npm organization.
   * *Item as string* - `'@rsw/hello'`
   * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path' }`
 
