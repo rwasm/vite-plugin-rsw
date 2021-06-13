@@ -17,6 +17,11 @@
 * [nodejs](https://nodejs.org)
 * [wasm-pack](https://github.com/rustwasm/wasm-pack)
 
+## Article
+
+* [中文 - WebAssembly入门](https://lencx.github.io/book/wasm/rust_wasm_frontend.html)
+* [WebAssembly 系列](https://github.com/lencx/fzj/discussions/22)
+
 ## Features
 
 * startup optimization
@@ -36,9 +41,6 @@
 <img width="480" src="./assets/rsw-error-outdir.png" alt="rsw error outdir">
 
 ## Quick Start
-
-[中文文档 - WebAssembly入门](https://lencx.github.io/book/wasm/rust_wasm_frontend.html)
-[WebAssembly 系列](https://github.com/lencx/fzj/discussions/22)
 
 [create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!
 
