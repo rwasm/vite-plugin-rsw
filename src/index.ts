@@ -12,6 +12,8 @@ const wasmMap = new Map<string, WasmFileInfo>();
 const cratePathMap = new Map<string, string>();
 
 export function ViteRsw(userOptions: RswPluginOptions): Plugin {
+  checkENV();
+
   let config: ResolvedConfig;
   const crateRoot = path.resolve(process.cwd(), userOptions.root || '');
   userOptions.crates.map((i) => {
@@ -28,7 +30,6 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
   debugRsw(`[process.cwd]: ${process.cwd()}`);
   debugRsw(`[crateRoot]: ${crateRoot}`);
   debugRsw(`[userOptions]: ${JSON.stringify(userOptions, null, 2)}`, );
-  checkENV();
 
   return {
     name: 'vite-plugin-rsw',

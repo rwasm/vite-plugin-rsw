@@ -201,7 +201,7 @@ pub fn greet(name: &str) {
 }
 `;
 
-export const crateHelp = (pkgName: string) => `┏━━━━━
+export const crateCodeHelp = (pkgName: string) => `┏━━━━━
 ┃ // https://github.com/rustwasm/wasm-pack
 ┃ // https://github.com/rustwasm/wasm-bindgen
 ┃
@@ -215,6 +215,7 @@ export const crateHelp = (pkgName: string) => `┏━━━━━
 ┃ greet('World!');
 ┗━━━━
 `;
+
 export const rswInfo = () => {
   const data: any = getRswPackage();
   const info = `vite-plugin-rsw (${data.version || '0.0.0'})`;

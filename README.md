@@ -17,7 +17,105 @@
 * [nodejs](https://nodejs.org)
 * [wasm-pack](https://github.com/rustwasm/wasm-pack)
 
-## Remote deployment project
+## Features
+
+* startup optimization
+* enable debug mode: `DEBUG=rsw yarn dev`
+* friendly error message: browser and terminal
+* automatically generate template when `crate` does not exist
+* multiple rust crate
+  * compile
+  * hot-update
+
+![rsw run](./assets/rsw.png)
+![rsw error](./assets/rsw-error.png)
+![rsw debug](./assets/rsw-debug.png)
+
+<img width="480" src="./assets/rsw-new.png" alt="rsw new">\
+<img width="480" src="./assets/rsw-error-wasm-pack.png" alt="rsw error wasm-pack">\
+<img width="480" src="./assets/rsw-error-outdir.png" alt="rsw error outdir">
+
+## Quick Start
+
+[中文文档 - WebAssembly入门](https://lencx.github.io/book/wasm/rust_wasm_frontend.html)
+[WebAssembly 系列](https://github.com/lencx/fzj/discussions/22)
+
+[create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!
+
+template: `wasm-vue3` and `wasm-react`
+
+```bash
+# With NPM
+npm init xc-app
+
+# With Yarn:
+yarn create xc-app
+
+# -------------------
+
+# command line options
+npm init xc-app my-wasm-app --template wasm-react
+```
+
+## Getting Started
+
+### Step1
+
+Install and configure `rsw`.
+
+```bash
+# install rsw
+npm i -D vite-plugin-rsw
+
+# or
+yarn add -D vite-plugin-rsw
+```
+
+```js
+// vite.config.ts
+import { defineConfig } from 'vite';
+import ViteRsw from 'vite-plugin-rsw';
+
+export default defineConfig({
+  plugins: [
+    ViteRsw({
+      crates: [
+        '@rsw/hey',
+        'rsw-test',
+        // https://github.com/lencx/vite-plugin-rsw/issues/8#issuecomment-820281861
+        // outDir: use `path.resolve` or relative path.
+        { name: '@rsw/hello', outDir: 'custom/path' },
+      ],
+    }),
+  ],
+});
+```
+
+### Step2
+
+Use exported Rust things from JavaScript with ECMAScript modules!
+
+```js
+import init, { greet } from '@rsw/hey';
+
+// 1. `WebAssembly.Instance` initialization
+init();
+
+// 2. Make sure this method is executed after `init()` is called
+greet('World!');
+```
+
+## Plugin Options
+
+* `root`: rust crate root path. default project root path.
+* `unLinks`: `string[]` - (npm unlink) uninstalls a package.
+* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L26) - (npm link) package name, support npm organization.
+  * *Item as string* - `'@rsw/hello'`
+  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path' }`
+
+> **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
+
+## Remote Deployment
 
 ### Install
 
@@ -60,98 +158,6 @@ npm install -D rsw-node
 
 ![rsw deploy](./assets/rsw-deploy.png)
 
-## Features
-
-* startup optimization
-* enable debug mode: `DEBUG=rsw yarn dev`
-* friendly error message: browser and terminal
-* automatically generate template when `crate` does not exist
-* multiple rust crate
-  * compile
-  * hot-update
-
-![rsw run](./assets/rsw.png)
-![rsw error](./assets/rsw-error.png)
-![rsw debug](./assets/rsw-debug.png)
-
-<img width="480" src="./assets/rsw-error-wasm-pack.png" alt="rsw error wasm-pack">\
-<img width="480" src="./assets/rsw-error-outdir.png" alt="rsw error outdir">
-
-## Quick Start
-
-[create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!
-
-template: `wasm-vue3` and `wasm-react`
-
-```bash
-# With NPM
-npm init xc-app
-
-# With Yarn:
-yarn create xc-app
-
-# -------------------
-
-# command line options
-npm init xc-app my-wasm-app --template wasm-react
-```
-
-## Getting Started
-
-### Step1
-
-```bash
-# install rsw
-npm i -D vite-plugin-rsw
-
-# or
-yarn add -D vite-plugin-rsw
-```
-
-```js
-// vite.config.ts
-import { defineConfig } from 'vite';
-import ViteRsw from 'vite-plugin-rsw';
-
-export default defineConfig({
-  plugins: [
-    ViteRsw({
-      crates: [
-        '@rsw/hey',
-        'rsw-test',
-        // https://github.com/lencx/vite-plugin-rsw/issues/8#issuecomment-820281861
-        // outDir: use `path.resolve` or relative path.
-        { name: '@rsw/hello', outDir: 'custom/path' },
-      ],
-    }),
-  ],
-});
-```
-
-### Step2
-
-Use exported Rust things from JavaScript with ECMAScript modules!
-
-```js
-import init, { greet } from '${pkgName}';
-
-// 1. `WebAssembly.Instance` initialization
-init();
-
-// 2. Make sure this method is executed after `init()` is called
-greet('World!');
-```
-
-## Plugin Options
-
-* `root`: rust crate root path. default project root path.
-* `unLinks`: `string[]` - (npm unlink) uninstalls a package.
-* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L26) - (npm link) package name, support npm organization.
-  * *Item as string* - `'@rsw/hello'`
-  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path' }`
-
-> **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
-
 ## Error
 
 * npm ERR! EEXIST: file already exists
@@ -168,16 +174,16 @@ greet('World!');
 
   ![rsw-error-link](./assets/rsw-error-link.png)
 
+## Video
+
+* [youtube](https://youtu.be/R_lTnYaDRQ4)
+* [bilibili (China)](https://www.bilibili.com/video/BV1Pw411f7pr?share_source=copy_web)
+
 ## Examples
 
 * [react](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/react)
 * [vue3](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/vue3)
 * [learn-wasm](https://github.com/lencx/learn-wasm)
-
-## Related List
-
-* [推荐 - WebAssembly入门](https://lencx.github.io/book/wasm/rust_wasm_frontend.html)
-* [Awesome WebAssembly](https://lencx.github.io/book/awesome/wasm.html)
 
 ## 微信
 

@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import { execFileSync, execSync } from 'child_process';
 
 import { RswCrateOptions } from './types';
-import { cargoToml, crateLib, crateHelp, rswInfo } from './template';
+import { cargoToml, crateLib, crateCodeHelp, rswInfo } from './template';
 
 const nodeBin = process.argv[0];
 
@@ -171,7 +171,7 @@ export function checkCrate(cratePath: string, crate: string) {
     // crate/src/lib.rs
     fs.writeFileSync(path.resolve(_root, 'src/lib.rs'), crateLib);
 
-    console.log(chalk.yellow(`\n[rsw::help] use \`${crate}\`\n${chalk.green(crateHelp(crate))}`));
+    console.log(chalk.yellow(`\n[rsw::code::help] use \`${crate}\`\n${chalk.green(crateCodeHelp(crate))}`));
   } catch (e) {
     console.error(e);
   }
