@@ -121,7 +121,7 @@ export function rswCompile(options: RswCompileOptions) {
   const pkgJson = path.resolve(root, 'package.json');
   if (filePath === pkgJson) {
     const oData = cacheMap.get('pkgJson');
-    const data = readFileSync(pkgJson, { encoding: 'utf-8' })
+    const data = readFileSync(pkgJson, { encoding: 'utf-8' });
     const jsonData = JSON.parse(data);
     const nData = JSON.stringify({ ...(jsonData.dependencies || {}), ...(jsonData.devDependencies || {}) })
 
@@ -151,7 +151,6 @@ export function rswCompile(options: RswCompileOptions) {
     );
   }
 
-  console.log();
   pkgsLink();
 }
 

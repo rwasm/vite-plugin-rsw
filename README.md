@@ -65,6 +65,7 @@ npm install -D rsw-node
 * startup optimization
 * enable debug mode: `DEBUG=rsw yarn dev`
 * friendly error message: browser and terminal
+* automatically generate template when `crate` does not exist
 * multiple rust crate
   * compile
   * hot-update
@@ -129,48 +130,16 @@ export default defineConfig({
 
 ### Step2
 
-```bash
-# example:
-#   npm package: `cargo new --lib rsw-test`
-#   npm org    : `cargo new --lib @rsw/hey`
-cargo new --lib <crate_name>
-```
+Use exported Rust things from JavaScript with ECMAScript modules!
 
-```toml
-# Cargo.toml
+```js
+import init, { greet } from '${pkgName}';
 
-# https://github.com/rustwasm/wasm-pack/issues/886
-# https://developers.google.com/web/updates/2019/02/hotpath-with-wasm
-[package.metadata.wasm-pack.profile.release]
-wasm-opt = false
+// 1. `WebAssembly.Instance` initialization
+init();
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-[lib]
-crate-type = ["cdylib", "rlib"]
-
-[profile.release]
-lto = true
-opt-level = "s"
-
-[dependencies]
-wasm-bindgen = "0.2.70"
-```
-
-```rust
-// src/lib.rs
-use wasm_bindgen::prelude::*;
-
-// Import the `window.alert` function from the Web.
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-// Export a `greet` function from Rust to JavaScript, that alerts a hello message.
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(&format!("Hello, {}!", name));
-}
+// 2. Make sure this method is executed after `init()` is called
+greet('World!');
 ```
 
 ## Plugin Options

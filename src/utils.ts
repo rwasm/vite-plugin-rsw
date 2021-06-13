@@ -4,8 +4,10 @@ import path from 'path';
 import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
-import { execFileSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
+
 import { RswCrateOptions } from './types';
+import { cargoToml, crateLib, crateHelp, rswInfo } from './template';
 
 const nodeBin = process.argv[0];
 
@@ -46,6 +48,15 @@ export const getCratePath = (crate: string | RswCrateOptions, crateRoot: string)
   return path.resolve(_root, 'pkg');
 };
 
+export function getPkgName(crate: string) {
+  let rswCrate = getCrateName(crate);
+  if (rswCrate.startsWith('@')) {
+    const a = rswCrate.match(/(@.*)\/(.*)/) as string[];
+    return a[2];
+  }
+  return rswCrate;
+}
+
 export function checkENV() {
   const wasmPack = which.sync('wasm-pack', { nothrow: true });
   if (!wasmPack) {
@@ -58,7 +69,10 @@ export function checkENV() {
       'wasm-pack install:',
       chalk.green('https://github.com/rustwasm/wasm-pack'),
     );
+    process.exit();
   }
+
+  console.log(rswInfo());
 }
 
 export function checkMtime(
@@ -125,4 +139,40 @@ export function loadWasm(code: string, oPath: string, nPath: string) {
   code = code.replace(`new URL('${oPath}',`, `new URL('${nPath}',`);
   code = code.replace(/, import\.meta\.url\)/, `, location.origin)`);
   return code;
+}
+
+export function gitInfo() {
+  const name = execSync(`git show -s --format=%cn`).toString().trim();
+  const email = execSync(`git show -s --format=%ce`).toString().trim();
+  return { name, email };
+}
+
+export function getRswPackage() {
+  try {
+    const pkgJson = path.resolve(process.cwd(), 'node_modules/vite-plugin-rsw/package.json');
+    const data = fs.readFileSync(pkgJson, { encoding: 'utf-8' });
+    return JSON.parse(data);
+  } catch (e) {
+    return {};
+  }
+}
+
+export function checkCrate(cratePath: string, crate: string) {
+  const _root = path.resolve(cratePath, crate);
+  const _cargoToml = path.resolve(_root, 'Cargo.toml');
+  const tomlExists = fs.existsSync(_cargoToml);
+  if (tomlExists) return;
+
+  try {
+    // crate/src
+    fs.mkdirSync(path.resolve(_root, 'src'), { recursive: true });
+    // crate/Cargo.toml
+    fs.writeFileSync(_cargoToml, cargoToml(crate));
+    // crate/src/lib.rs
+    fs.writeFileSync(path.resolve(_root, 'src/lib.rs'), crateLib);
+
+    console.log(chalk.yellow(`\n[rsw::help] use \`${crate}\`\n${chalk.green(crateHelp(crate))}`));
+  } catch (e) {
+    console.error(e);
+  }
 }

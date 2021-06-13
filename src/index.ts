@@ -3,10 +3,10 @@ import path from 'path';
 import { createHash } from 'crypto';
 import type { Plugin, ResolvedConfig } from 'vite';
 
-import { rswOverlay, rswHot } from './overlay';
+import { rswOverlay, rswHot } from './template';
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugRsw, checkENV, getCratePath, loadWasm } from './utils';
+import { debugRsw, checkENV, checkCrate, getCratePath, loadWasm } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 const cratePathMap = new Map<string, string>();
@@ -18,6 +18,9 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     const _name = typeof i === 'string' ? i : i.name;
     if (!cratePathMap.has(_name)) {
       cratePathMap.set(_name, getCratePath(i, crateRoot));
+
+      // feat: https://github.com/lencx/vite-plugin-rsw/issues/9
+      checkCrate(crateRoot, _name);
     }
   });
   const re = Array.from(cratePathMap.values()).map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
