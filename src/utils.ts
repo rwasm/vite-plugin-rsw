@@ -142,9 +142,15 @@ export function loadWasm(code: string, oPath: string, nPath: string) {
 }
 
 export function gitInfo() {
-  const name = execSync(`git show -s --format=%cn`).toString().trim();
-  const email = execSync(`git show -s --format=%ce`).toString().trim();
-  return { name, email };
+  try {
+    // fix: https://github.com/lencx/vite-plugin-rsw/issues/10
+    const name = execSync(`git config --global user.name`).toString().trim();
+    const email = execSync(`git config --global user.email`).toString().trim();
+    return { name, email };
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
 }
 
 export function getRswPackage() {
