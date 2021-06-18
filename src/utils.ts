@@ -16,6 +16,7 @@ export const sleep = (time: number) => execFileSync(nodeBin, ['-e', `setTimeout(
 export const debugRsw = debug('rsw');
 
 export const isWin = os.platform() === 'win32';
+
 export const userRoot = process.env.HOME || '';
 
 export const wpCmd = () => isWin ? 'wasm-pack.exe' : 'wasm-pack';
@@ -148,7 +149,6 @@ export function gitInfo() {
     const email = execSync(`git config --global user.email`).toString().trim();
     return { name, email };
   } catch (e) {
-    console.error(e);
     return {};
   }
 }

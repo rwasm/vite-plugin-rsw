@@ -106,7 +106,9 @@ export function rswCompile(options: RswCompileOptions) {
       // rust crates map
       pkgMap.set(_name, outDir);
     })
-    rswPkgsLink(Array.from(pkgMap.values()).join(' '), npmType);
+
+    rswPkgsLink(pkgMap, npmType);
+
     console.log(chalk.green(`\n[rsw::${npmType}]`));
     pkgMap.forEach((val, key) => {
       console.log(
@@ -172,10 +174,21 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
   })
 }
 
-function rswPkgsLink(pkgs: string, type: NpmCmdType) {
+function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType) {
   const npm = npmCmd();
-  const npmArgs = [type, pkgs];
-  spawnSync(npm, npmArgs, {
+  let pkgLinks = pkgs;
+
+  // fix: https://github.com/lencx/vite-plugin-rsw/issues/11
+  if (typeof pkgs !== 'string') {
+    pkgLinks = Array.from(pkgs.values()).join(' ');
+    spawnSync(npm, ['unlink', '-g', Array.from(pkgs.keys()).join(' ')], {
+      shell: true,
+      cwd: process.cwd(),
+      stdio: 'inherit',
+    });
+  }
+
+  spawnSync(npm, [type, (pkgLinks as string)], {
     shell: true,
     cwd: process.cwd(),
     stdio: 'inherit',

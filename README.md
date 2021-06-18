@@ -52,11 +52,6 @@ npm init xc-app
 
 # With Yarn:
 yarn create xc-app
-
-# -------------------
-
-# command line options
-npm init xc-app my-wasm-app --template wasm-react
 ```
 
 ## Getting Started
@@ -159,22 +154,6 @@ npm install -D rsw-node
 * [learn-wasm/.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
 
 ![rsw deploy](./assets/rsw-deploy.png)
-
-## Error
-
-* npm ERR! EEXIST: file already exists
-
-  ```bash
-  # https://docs.npmjs.com/cli/v6/commands/npm-link
-  # npm link uses the global prefix (see npm prefix -g for its value)
-  # /Users/lencx/.nvm/versions/node/v15.6.0
-  npm prefix -g
-
-  # after removing the folder, try again `npm run dev`
-  rm -rf /Users/lencx/.nvm/versions/node/v15.6.0/lib/node_modules/@rsw/chasm
-  ```
-
-  ![rsw-error-link](./assets/rsw-error-link.png)
 
 ## Video
 
