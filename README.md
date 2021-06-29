@@ -172,6 +172,14 @@ npm install -D rsw-node
 
 <img height="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /> <img height="160" src="./assets/fzj-qrcode.png" alt="fzj-qrcode" />
 
+## Credits
+
+### [Backers](https://opencollective.com/vite-plugin-rsw#backer)
+
+Thank you to all our backers! 🙏
+
+<a href="https://opencollective.com/vite-plugin-rsw#backers" target="_blank"><img src="https://opencollective.com/vite-plugin-rsw/backers.svg?width=890"></a>
+
 ## License
 
 MIT License © 2021 [lencx](https://github.com/lencx)
