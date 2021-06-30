@@ -166,19 +166,19 @@ npm install -D rsw-node
 * [vue3](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/vue3)
 * [learn-wasm](https://github.com/lencx/learn-wasm)
 
+## Credits
+
+### [Backers](https://opencollective.com/vite-plugin-rsw)
+
+Thank you to all our backers! 🙏
+
+<a href="https://opencollective.com/vite-plugin-rsw" target="_blank"><img src="https://opencollective.com/vite-plugin-rsw/tiers/backer.svg?avatarHeight=36&width=600"></a>
+
 ## 微信
 
 > 群二维码已过期，关注公众号《浮之静》，发送“进群”，我将拉你进群一起学习。
 
 <img height="180" src="./assets/wasm-qrcode.png" alt="wasm-wechat-qrcode" /> <img height="160" src="./assets/fzj-qrcode.png" alt="fzj-qrcode" />
-
-## Credits
-
-### [Backers](https://opencollective.com/vite-plugin-rsw#backer)
-
-Thank you to all our backers! 🙏
-
-<a href="https://opencollective.com/vite-plugin-rsw#backers" target="_blank"><img src="https://opencollective.com/vite-plugin-rsw/backers.svg?width=890"></a>
 
 ## License
 
