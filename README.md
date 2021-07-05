@@ -20,7 +20,7 @@
 ## Article
 
 * [中文 - WebAssembly入门](https://lencx.github.io/book/wasm/rust_wasm_frontend.html)
-* [WebAssembly 系列](https://github.com/lencx/fzj/discussions/22)
+* [WebAssembly Series](https://github.com/lencx/fzj/discussions/22)
 
 ## Features
 

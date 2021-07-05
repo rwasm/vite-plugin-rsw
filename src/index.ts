@@ -56,14 +56,16 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
         if (!wasmMap.has(fileId) && config?.command !== 'serve') {
           const source = fs.readFileSync(path.resolve(crateRoot, fileId));
           const hash = createHash('md5').update(String(source)).digest('hex').substring(0, 8);
-          const _name = config?.build?.assetsDir + '/' + path.basename(fileId).replace('.wasm', `.${hash}.wasm`);
+
+          // fix: https://github.com/lencx/vite-plugin-rsw/issues/12
+          const _name = path.join(config?.build?.assetsDir, path.basename(fileId).replace('.wasm', `.${hash}.wasm`));
           wasmMap.set(fileId, {
             fileName: _name,
             source,
           });
 
           // fix: fetch or URL
-          code = loadWasm(code, path.basename(fileId), config.base + _name);
+          code = loadWasm(code, path.basename(fileId), path.join(config.base, _name));
           return code;
         }
 
