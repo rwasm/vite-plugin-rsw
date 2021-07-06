@@ -150,7 +150,7 @@ npm install -D rsw-node
     ]
   }
   ```
-
+****
 * [learn-wasm/.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
 
 ![rsw deploy](./assets/rsw-deploy.png)
