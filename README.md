@@ -1,5 +1,7 @@
 # vite-plugin-rsw
 
+> wasm-pack plugin for Vite
+
 [![npm](https://img.shields.io/npm/v/vite-plugin-rsw.svg)](https://www.npmjs.com/package/vite-plugin-rsw)
 [![npm downloads](https://img.shields.io/npm/dm/vite-plugin-rsw.svg)](https://npmjs.org/package/vite-plugin-rsw)
 [![vite version](https://img.shields.io/badge/Vite-^2.0.0-000000?style=flat&labelColor=646cff)](https://github.com/vitejs/vite)
@@ -8,8 +10,6 @@
 [![awesome-rsw](./assets/awesome-rsw.svg)](https://github.com/lencx/awesome-rsw)
 [![Rust](https://img.shields.io/badge/-Rust-DEA584?style=flat&logo=rust&logoColor=000000)](https://www.rust-lang.org)
 [![WebAssembly](https://img.shields.io/badge/-WebAssembly-654FF0?style=flat&logo=webassembly&logoColor=ffffff)](https://webassembly.org)
-
-> wasm-pack plugin for vite@v2
 
 ## Pre-installed
 

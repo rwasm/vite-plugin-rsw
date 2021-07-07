@@ -27,7 +27,7 @@ export const getCrateName = (crate: string | RswCrateOptions): string => (
   typeof crate === 'object' ? crate.name : crate
 );
 
-export const getCratePath = (crate: string | RswCrateOptions, crateRoot: string): string => {
+export function getCratePath(crate: string | RswCrateOptions, crateRoot: string) {
   const _name = (crate as RswCrateOptions).name;
   const _root = path.join(crateRoot, _name ? _name : (crate as string));
   if (typeof crate === 'object' && crate.outDir) {
@@ -136,9 +136,12 @@ export function loadWasm(code: string, oPath: string, nPath: string) {
     `~>`,
     chalk.green(nPath),
   );
-  code = code.replace(/import\.meta\.url\.replace\(\/\\\\\.js\$\/, \\'_bg\.wasm\\'\);/, `fetch('${nPath}')`);
-  code = code.replace(`new URL('${oPath}',`, `new URL('${nPath}',`);
-  code = code.replace(/, import\.meta\.url\)/, `, location.origin)`);
+
+  // fix: https://github.com/lencx/vite-plugin-rsw/issues/13
+  code = code
+    .replace(/input \= import\.meta\.url\.replace.+$/gm, `input = fetch('${nPath}');`)
+    .replace(/input \= new URL.+$/gm, `input = new URL('${nPath}', location.origin);`);
+
   return code;
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-rsw",
-  "description": "wasm-pack plugin for vite@v2",
-  "version": "1.6.4",
+  "description": "wasm-pack plugin for Vite",
+  "version": "1.6.5",
   "author": "lencx <cxin1314@gmail.com>",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -27,6 +27,7 @@
     "wasm",
     "vite",
     "plugin",
+    "wasm-pack",
     "vite-plugin",
     "webAssembly"
   ],

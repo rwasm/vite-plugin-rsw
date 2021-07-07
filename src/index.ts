@@ -70,7 +70,7 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
         }
 
         // wasm file path and rsw hot
-        return code.replace(/import\.meta\.url\.replace\(\/\\\\\.js\$\/, \\'_bg\.wasm\\'\);/, `fetch('/${fileId}')`) + rswHot;
+        return code.replace(/input \= import\.meta\.url\.replace.+$/gm, `input = fetch('${fileId}');`) + rswHot;
       }
       return code;
     },
