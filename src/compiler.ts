@@ -7,7 +7,7 @@ import type { ViteDevServer } from 'vite';
 
 import fmtRustError from './rserr';
 import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime } from './utils';
-import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType } from './types';
+import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType, CliType } from './types';
 
 const cacheMap = new Map();
 
@@ -83,7 +83,7 @@ function compileOne(options: CompileOneOptions) {
 
 export function rswCompile(options: RswCompileOptions) {
   const { config, root, crate, serve, filePath, npmType = 'link', cratePathMap } = options;
-  const { crates, unLinks, ...opts } = config;
+  const { crates, unLinks, cli = 'npm', ...opts } = config;
 
   const pkgsLink = (isRun: boolean = true) => {
     // compile & npm link
@@ -107,9 +107,9 @@ export function rswCompile(options: RswCompileOptions) {
       pkgMap.set(_name, outDir);
     })
 
-    rswPkgsLink(pkgMap, npmType);
+    rswPkgsLink(pkgMap, npmType, cli);
 
-    console.log(chalk.green(`\n[rsw::${npmType}]`));
+    console.log(chalk.green(`\n[rsw::${cli}::${npmType}]`));
     pkgMap.forEach((val, key) => {
       console.log(
         chalk.yellow(`  ↳ ${key} `),
@@ -128,7 +128,7 @@ export function rswCompile(options: RswCompileOptions) {
     const nData = JSON.stringify({ ...(jsonData.dependencies || {}), ...(jsonData.devDependencies || {}) })
 
     if (oData !== nData) {
-      console.log(chalk.blue(`\n[rsw::relink]`));
+      console.log(chalk.blue(`\n[rsw::${cli}::relink]`));
       sleep(1000);
       pkgsLink(false);
       cacheMap.set('pkgJson', nData);
@@ -145,10 +145,10 @@ export function rswCompile(options: RswCompileOptions) {
   // init
   // npm unlink
   if (unLinks && unLinks.length > 0) {
-    rswPkgsLink(unLinks.join(' '), 'unlink');
+    rswPkgsLink(unLinks.join(' '), 'unlink', cli);
     console.log();
     console.log(
-      chalk.red(`\n[rsw::unlink]`),
+      chalk.red(`\n[rsw::${cli}::unlink]`),
       chalk.blue(`  ↳ ${unLinks.join(' \n  ↳ ')} \n`)
     );
   }
@@ -174,14 +174,14 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
   })
 }
 
-function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType) {
-  const npm = npmCmd();
+function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType, cli: CliType) {
+  const npm = npmCmd(cli);
   let pkgLinks = pkgs;
 
   // fix: https://github.com/lencx/vite-plugin-rsw/issues/11
   if (typeof pkgs !== 'string') {
     pkgLinks = Array.from(pkgs.values()).join(' ');
-    spawnSync(npm, ['unlink', '-g', Array.from(pkgs.keys()).join(' ')], {
+    spawnSync(npm, ['unlink', Array.from(pkgs.keys()).join(' ')], {
       shell: true,
       cwd: process.cwd(),
       stdio: 'inherit',

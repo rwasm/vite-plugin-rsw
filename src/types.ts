@@ -1,5 +1,9 @@
 import type { ViteDevServer } from 'vite';
 
+export type NpmCmdType = 'install' | 'link' | 'unlink';
+
+export type CliType = 'npm' | 'pnpm';
+
 export type RswCrateOptions = {
   name: string;
   outDir?: string;
@@ -11,18 +15,20 @@ export type WasmFileInfo = {
   source: string | false | undefined | Uint8Array;
 }
 
-export interface RswConfig {
+export type BaseRswConfig = {
   root?: string; // default: project root
+  // feat: https://github.com/lencx/vite-plugin-rsw/issues/14
+  cli?: CliType; // default: npm
+  unLinks?: Array<string|RswCrateOptions>;
 }
 
 // Plugin options
-export interface RswPluginOptions extends RswConfig {
-  unLinks?: Array<string|RswCrateOptions>;
+export type RswPluginOptions = BaseRswConfig & {
   crates: Array<string|RswCrateOptions>;
 }
 
 export type CompileOneOptions = {
-  config: RswConfig;
+  config: BaseRswConfig;
   crate: string | RswCrateOptions;
   sync: boolean;
   serve?: ViteDevServer;
@@ -30,8 +36,6 @@ export type CompileOneOptions = {
   root?: string;
   outDir?: string;
 }
-
-export type NpmCmdType = 'install' | 'link' | 'unlink';
 
 export type RswCompileOptions = {
   config: RswPluginOptions;
