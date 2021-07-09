@@ -104,6 +104,7 @@ greet('World!');
 
 ## Plugin Options
 
+* `cli`: specified package manager `npm` or `pnpm`, default `npm`.
 * `root`: rust crate root path. default project root path.
 * `unLinks`: `string[]` - (npm unlink) uninstalls a package.
 * `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L26) - (npm link) package name, support npm organization.
