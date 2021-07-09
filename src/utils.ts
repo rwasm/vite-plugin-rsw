@@ -6,7 +6,7 @@ import debug from 'debug';
 import chalk from 'chalk';
 import { execFileSync, execSync } from 'child_process';
 
-import { RswCrateOptions } from './types';
+import { RswCrateOptions, CliType } from './types';
 import { cargoToml, crateLib, crateCodeHelp, rswInfo } from './template';
 
 const nodeBin = process.argv[0];
@@ -21,7 +21,10 @@ export const userRoot = process.env.HOME || '';
 
 export const wpCmd = () => isWin ? 'wasm-pack.exe' : 'wasm-pack';
 
-export const npmCmd = () => isWin ? 'npm.cmd' : 'npm';
+export const npmCmd = (cli?: CliType) => {
+  if (cli && ['npm', 'pnpm'].includes(cli)) return cli;
+  return 'npm';
+}
 
 export const getCrateName = (crate: string | RswCrateOptions): string => (
   typeof crate === 'object' ? crate.name : crate
