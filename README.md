@@ -11,6 +11,11 @@
 [![Rust](https://img.shields.io/badge/-Rust-DEA584?style=flat&logo=rust&logoColor=000000)](https://www.rust-lang.org)
 [![WebAssembly](https://img.shields.io/badge/-WebAssembly-654FF0?style=flat&logo=webassembly&logoColor=ffffff)](https://webassembly.org)
 
+|rsw version|vite version|
+|---|---|
+|`1.8.x`|`2.4.x`|
+|`1.7.0`|`2.0.0 ~ 2.3.8`|
+
 ## Pre-installed
 
 * [rust](https://www.rust-lang.org/learn/get-started)

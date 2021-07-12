@@ -69,8 +69,8 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
           return code;
         }
 
-        // wasm file path and rsw hot
-        return code.replace(/input \= import\.meta\.url\.replace.+$/gm, `input = fetch('${fileId}');`) + rswHot;
+        // rsw hot
+        return code + rswHot;
       }
       return code;
     },

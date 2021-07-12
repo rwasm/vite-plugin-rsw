@@ -140,11 +140,6 @@ export function loadWasm(code: string, oPath: string, nPath: string) {
     chalk.green(nPath),
   );
 
-  // fix: https://github.com/lencx/vite-plugin-rsw/issues/13
-  code = code
-    .replace(/input \= import\.meta\.url\.replace.+$/gm, `input = fetch('${nPath}');`)
-    .replace(/input \= new URL.+$/gm, `input = new URL('${nPath}', location.origin);`);
-
   return code;
 }
 
