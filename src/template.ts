@@ -181,7 +181,7 @@ crate-type = ["cdylib", "rlib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wasm-bindgen = "0.2.74"
+wasm-bindgen = "0.2.75"
 `;
 };
 

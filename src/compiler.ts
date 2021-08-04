@@ -181,7 +181,7 @@ function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType, cli: 
   // fix: https://github.com/lencx/vite-plugin-rsw/issues/11
   if (typeof pkgs !== 'string') {
     pkgLinks = Array.from(pkgs.values()).join(' ');
-    spawnSync(npm, ['unlink', Array.from(pkgs.keys()).join(' ')], {
+    spawnSync(npm, ['unlink', '-g', Array.from(pkgs.keys()).join(' ')], {
       shell: true,
       cwd: process.cwd(),
       stdio: 'inherit',
