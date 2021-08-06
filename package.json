@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-rsw",
   "description": "wasm-pack plugin for Vite",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "author": "lencx <cxin1314@gmail.com>",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -45,7 +45,7 @@
     "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.15.1",
     "eslint": "^7.30.0",
-    "tsup": "^4.12.5",
+    "tsup": "^4.13.1",
     "typescript": "^4.3.5",
     "vite": "^2.4.0"
   }
