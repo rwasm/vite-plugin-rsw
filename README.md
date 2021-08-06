@@ -45,11 +45,22 @@
 <img width="480" src="./assets/rsw-error-wasm-pack.png" alt="rsw error wasm-pack">\
 <img width="480" src="./assets/rsw-error-outdir.png" alt="rsw error outdir">
 
+## Plugin Options
+
+* `cli`: specified package manager `npm` or `pnpm`, default `npm`.
+* `root`: rust crate root path. default project root path.
+* `unLinks`: `string[]` - (npm unlink) uninstalls a package.
+* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L26) - (npm link) package name, support npm organization.
+  * *Item as string* - `'@rsw/hello'`
+  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path' }`
+
+> **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
+
 ## Quick Start
 
 [create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!
 
-template: `wasm-vue3` and `wasm-react`
+### Step1
 
 ```bash
 # With NPM
@@ -59,19 +70,34 @@ npm init xc-app
 yarn create xc-app
 ```
 
-## Getting Started
-
-### Step1
-
-Install and configure `rsw`.
+You can also directly specify the project name and the template you want to use via additional command line options.
 
 ```bash
-# install rsw
-npm i -D vite-plugin-rsw
+# npm 6.x
+npm init xc-app my-wasm-app --template wasm-react
 
-# or
-yarn add -D vite-plugin-rsw
+# npm 7+, extra double-dash is needed:
+npm init xc-app my-wasm-app -- --template wasm-react
+
+# yarn
+yarn create xc-app my-wasm-app --template wasm-react
 ```
+
+Currently supported template presets include `wasm-vue3` and `wasm-react`.
+
+### Step2
+
+```bash
+cd my-wasm-app
+
+npm install
+
+npm run dev
+```
+
+### Step3
+
+You can edit the `crates` in `ViteRsw` to create your own rust crates.
 
 ```js
 // vite.config.ts
@@ -82,8 +108,8 @@ export default defineConfig({
   plugins: [
     ViteRsw({
       crates: [
-        '@rsw/hey',
-        'rsw-test',
+        '@rsw/hey', // npm org
+        'rsw-test', // npm package
         // https://github.com/lencx/vite-plugin-rsw/issues/8#issuecomment-820281861
         // outDir: use `path.resolve` or relative path.
         { name: '@rsw/hello', outDir: 'custom/path' },
@@ -93,7 +119,7 @@ export default defineConfig({
 });
 ```
 
-### Step2
+### Step4
 
 Use exported Rust things from JavaScript with ECMAScript modules!
 
@@ -107,20 +133,7 @@ init();
 greet('World!');
 ```
 
-## Plugin Options
-
-* `cli`: specified package manager `npm` or `pnpm`, default `npm`.
-* `root`: rust crate root path. default project root path.
-* `unLinks`: `string[]` - (npm unlink) uninstalls a package.
-* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L26) - (npm link) package name, support npm organization.
-  * *Item as string* - `'@rsw/hello'`
-  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path' }`
-
-> **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
-
 ## Remote Deployment
-
-### Install
 
 Install [lencx/rsw-node](https://github.com/lencx/rsw-node) globally, you can use the `rsw` command.
 
@@ -130,34 +143,69 @@ npm i -g rsw-node
 
 <img width="480" src="./assets/rsw-node-help.png" alt="rsw help">
 
-## Example
+### Example
 
-* [learn-wasm/package.json](https://github.com/lencx/learn-wasm/blob/main/package.json)
+#### Step1
+
+[learn-wasm/package.json](https://github.com/lencx/learn-wasm/blob/main/package.json)
 
 ```bash
 npm install -D rsw-node
 ```
 
-  ```json
-  "scripts": {
-    "rsw:deploy": "rsw && npm run build"
-  }
-  ```
+```json
+"scripts": {
+  "rsw:deploy": "rsw && npm run build"
+}
+```
 
-* [learn-wasm/.rswrc.json](https://github.com/lencx/learn-wasm/blob/main/.rswrc.json)
+#### Step2
 
-  ```json
-  {
-    "root": ".",
-    "crates": [
-      "@rsw/chasm",
-      "@rsw/game-of-life",
-      "@rsw/excel-read"
-    ]
-  }
-  ```
-****
-* [learn-wasm/.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
+[learn-wasm/.rswrc.json](https://github.com/lencx/learn-wasm/blob/main/.rswrc.json)
+
+```json
+{
+  "root": ".",
+  "crates": [
+    "@rsw/chasm",
+    "@rsw/game-of-life",
+    "@rsw/excel-read"
+  ]
+}
+```
+
+#### Step3
+
+[learn-wasm/.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
+
+```yml
+# .github/workflows/deploy.yml
+
+name: github pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: yarn
+      - run: yarn rsw:deploy # rsw-node build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          publish_dir: ./dist
+```
 
 ![rsw deploy](./assets/rsw-deploy.png)
 
