@@ -9,12 +9,11 @@ import fmtRustError from './rserr';
 import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType, CliType } from './types';
 
-const cacheMap = new Map();
+const cacheMap = new Map<string, string>();
 
 function compileOne(options: CompileOneOptions) {
   const { crate, sync, serve, filePath, root = '', outDir } = options;
 
-  const wp = wpCmd();
   // 🚀 build release please use: https://github.com/lencx/rsw-node
   const args = ['build', `--dev`, '--target', 'web'];
 
@@ -25,8 +24,8 @@ function compileOne(options: CompileOneOptions) {
   rswCrate = getCrateName(crate);
 
   if (rswCrate.startsWith('@')) {
-    const a = rswCrate.match(/(@.*)\/(.*)/) as string[];
-    scope = a[1].substring(1);
+    const a = rswCrate.split(/@|\//);
+    scope = a[1];
     pkgName = `${scope}~${a[2]}`;
   } else {
     pkgName = rswCrate;
@@ -42,7 +41,7 @@ function compileOne(options: CompileOneOptions) {
   const crateRoot = path.resolve(root, rswCrate);
 
   if (sync) {
-    let p = spawnSync(wp, args, {
+    let p = spawnSync(wpCmd, args, {
       shell: true,
       cwd: crateRoot,
       encoding: 'utf-8',
@@ -54,7 +53,7 @@ function compileOne(options: CompileOneOptions) {
       process.exit();
     }
   } else {
-    exec(`${wp} ${args.join(' ')}`, { cwd: crateRoot }, (err, _, stderr) => {
+    exec(`${wpCmd} ${args.join(' ')}`, { cwd: crateRoot }, (err, _, stderr) => {
       // fix: no error, returns
       if (!err) {
         serve && serve.ws.send({ type: 'custom', event: 'rsw-error-close' });

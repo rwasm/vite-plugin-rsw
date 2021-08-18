@@ -19,7 +19,7 @@ export const isWin = os.platform() === 'win32';
 
 export const userRoot = process.env.HOME || '';
 
-export const wpCmd = () => isWin ? 'wasm-pack.exe' : 'wasm-pack';
+export const wpCmd = isWin ? 'wasm-pack.exe' : 'wasm-pack';
 
 export const npmCmd = (cli?: CliType) => {
   if (cli && ['npm', 'pnpm'].includes(cli)) return cli;
@@ -55,8 +55,8 @@ export function getCratePath(crate: string | RswCrateOptions, crateRoot: string)
 export function getPkgName(crate: string) {
   let rswCrate = getCrateName(crate);
   if (rswCrate.startsWith('@')) {
-    const a = rswCrate.match(/(@.*)\/(.*)/) as string[];
-    return a[2];
+    const a = rswCrate.split('/');
+    return a[1];
   }
   return rswCrate;
 }
