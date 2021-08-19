@@ -4,6 +4,7 @@ import chokidar from 'chokidar';
 import { readFileSync } from 'fs';
 import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
+import TOML from '@iarna/toml';
 
 import fmtRustError from './rserr';
 import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime } from './utils';
@@ -169,6 +170,11 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
       path.resolve(root, name, 'Cargo.toml'),
     ], (_path) => {
       rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
+      const tomlFile = readFileSync(_path, { encoding: 'utf-8' });
+      const tomlData = TOML.parse(tomlFile);
+
+      // TODO: local path - watch tomal dependencies
+      // console.log('«173» /vite-plugin-rsw/src/compiler.ts ~> ', _path, tomlData);
     });
   })
 }
