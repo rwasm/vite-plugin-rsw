@@ -4,6 +4,7 @@ import path from 'path';
 import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
+import toml from '@iarna/toml';
 import { execFileSync, execSync } from 'child_process';
 
 import { RswCrateOptions, CliType } from './types';
@@ -182,4 +183,20 @@ export function checkCrate(cratePath: string, crate: string) {
   } catch (e) {
     console.error(e);
   }
+}
+
+export function getPaths(entry: string, outFile: string) {
+  const paths = new Set();
+  const tomlFile = fs.readFileSync(entry, { encoding: 'utf-8' });
+  const tomlData = toml.parse(tomlFile);
+
+  const getVal = (prop: string | null, data: string | Object): void => {
+    if (Array.isArray(data)) return data.forEach((i) => getVal(null, i));
+    if (data === Object(data)) Object.entries(data).forEach(([key, val]) => getVal(key === 'path' ? key : null, val));
+    if (prop) paths.add(data);
+  }
+
+  getVal(null, [tomlData.target, tomlData.dependencies, tomlData['dev-dependencies'], tomlData['build-dependencies']]);
+
+  fs.writeFileSync(outFile, `${[...paths].join('\n')}`, { encoding: 'utf-8' });
 }

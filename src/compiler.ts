@@ -173,8 +173,12 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
       const tomlFile = readFileSync(_path, { encoding: 'utf-8' });
       const tomlData = TOML.parse(tomlFile);
 
-      // TODO: local path - watch tomal dependencies
+      // TODO: local path - watch toml dependencies
       // console.log('«173» /vite-plugin-rsw/src/compiler.ts ~> ', _path, tomlData);
+      console.log(JSON.stringify(tomlData.target, null, 2));
+      console.log(JSON.stringify(tomlData.dependencies, null, 2));
+      console.log(JSON.stringify(tomlData['dev-dependencies'], null, 2));
+      console.log(JSON.stringify(tomlData['build-dependencies'], null, 2));
     });
   })
 }
