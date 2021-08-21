@@ -6,6 +6,7 @@ import debug from 'debug';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
 import { execFileSync, execSync } from 'child_process';
+import fg from 'fast-glob';
 
 import { RswCrateOptions, CliType } from './types';
 import { cargoToml, crateLib, crateCodeHelp, rswInfo } from './template';
@@ -185,18 +186,68 @@ export function checkCrate(cratePath: string, crate: string) {
   }
 }
 
-export function getPaths(entry: string, outFile: string) {
-  const paths = new Set();
-  const tomlFile = fs.readFileSync(entry, { encoding: 'utf-8' });
-  const tomlData = toml.parse(tomlFile);
+export function genRswJson(data: string[]) {
+  const rswFile = path.resolve(process.cwd(), '.rsw.json');
+  const rswExists = fs.existsSync(rswFile);
 
-  const getVal = (prop: string | null, data: string | Object): void => {
-    if (Array.isArray(data)) return data.forEach((i) => getVal(null, i));
-    if (data === Object(data)) Object.entries(data).forEach(([key, val]) => getVal(key === 'path' ? key : null, val));
-    if (prop) paths.add(data);
+  const writeRsw = (type: string) => {
+    fs.writeFileSync(rswFile, JSON.stringify({ crates: data }, null, 2));
+    console.log(chalk.yellow(`[rsw::${type}] .rsw.json`));
+    console.log(chalk.gray(`[rsw::package.json] add command
+
+  {
+    "scripts: {
+  ${chalk.green`+    "rsw:build": "rsw && npm run build"`}
+    }
+  }`));
   }
 
-  getVal(null, [tomlData.target, tomlData.dependencies, tomlData['dev-dependencies'], tomlData['build-dependencies']]);
+  if (!rswExists) return writeRsw('create');
+
+  // match {svelte,vite}.config.{js,ts}
+  const configName = fg.sync('{svelte,vite}.config.{js,ts}')?.[0];
+  const pkgFile = path.resolve(process.cwd(), configName);
+  const rswMtime = fs.statSync(rswFile).mtimeMs;
+  const pkgMtime = fs.statSync(pkgFile).mtimeMs;
+  if (rswMtime < pkgMtime) writeRsw('update');
+}
+
+export function getPaths(entries: string[], outFile: string, crateRoot: string) {
+  const paths = new Set();
+
+  entries.forEach((entry: string) => {
+    const tomlFile = fs.readFileSync(entry, { encoding: 'utf-8' });
+    const tomlData = toml.parse(tomlFile);
+
+    const getVal = (prop: string | null, data: string | Object, root: string): void => {
+      if (Array.isArray(data)) return data.forEach((i) => getVal(null, i, root));
+      if (data === Object(data)) Object.entries(data).forEach(([key, val]) => getVal(key === 'path' ? key : null, val, root));
+      if (prop) {
+        const childCrate = path.join(root, data as string);
+        paths.add(childCrate);
+        try {
+          const childTomlFile = fs.readFileSync(`${childCrate}/Cargo.toml`, { encoding: 'utf-8' });
+          const childTomlData = toml.parse(childTomlFile);
+          getVal(null, [
+            childTomlData.target,
+            childTomlData.dependencies,
+            childTomlData['dev-dependencies'],
+            childTomlData['build-dependencies']
+          ], childCrate);
+        } catch (e) {
+          console.error(e);
+          process.exit();
+        }
+      }
+    }
+
+    getVal(null, [
+      tomlData.target,
+      tomlData.dependencies,
+      tomlData['dev-dependencies'],
+      tomlData['build-dependencies']
+    ], crateRoot);
+  })
 
   fs.writeFileSync(outFile, `${[...paths].join('\n')}`, { encoding: 'utf-8' });
 }
