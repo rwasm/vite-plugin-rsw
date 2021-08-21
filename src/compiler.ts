@@ -1,13 +1,11 @@
 import path from 'path';
 import chalk from 'chalk';
-import chokidar from 'chokidar';
 import { readFileSync } from 'fs';
 import { spawnSync, exec } from 'child_process';
 import type { ViteDevServer } from 'vite';
-import TOML from '@iarna/toml';
 
 import fmtRustError from './rserr';
-import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime } from './utils';
+import { wpCmd, npmCmd, debugRsw, sleep, getCrateName, checkMtime, watch, watchDeps } from './utils';
 import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions, NpmCmdType, CliType } from './types';
 
 const cacheMap = new Map<string, string>();
@@ -157,7 +155,7 @@ export function rswCompile(options: RswCompileOptions) {
 }
 
 export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevServer, cratePathMap: Map<string, string>) {
-  watch([path.resolve(root, 'package.json')], (_path) => {
+  watch([path.resolve(root, 'package.json')], 'repo', (_path) => {
     rswCompile({ config, root, serve, filePath: _path, cratePathMap });
   });
 
@@ -168,17 +166,11 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
     watch([
       path.resolve(root, name, 'src'),
       path.resolve(root, name, 'Cargo.toml'),
-    ], (_path) => {
+    ], 'main', (_path) => {
       rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
-      const tomlFile = readFileSync(_path, { encoding: 'utf-8' });
-      const tomlData = TOML.parse(tomlFile);
-
-      // TODO: local path - watch toml dependencies
-      // console.log('«173» /vite-plugin-rsw/src/compiler.ts ~> ', _path, tomlData);
-      console.log(JSON.stringify(tomlData.target, null, 2));
-      console.log(JSON.stringify(tomlData.dependencies, null, 2));
-      console.log(JSON.stringify(tomlData['dev-dependencies'], null, 2));
-      console.log(JSON.stringify(tomlData['build-dependencies'], null, 2));
+    });
+    watchDeps(name, (_path) => {
+      rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
     });
   })
 }
@@ -201,23 +193,5 @@ function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType, cli: 
     shell: true,
     cwd: process.cwd(),
     stdio: 'inherit',
-  });
-}
-
-function watch(args: string[], callback: (path: string) => void) {
-  chokidar.watch(args, {
-    ignoreInitial: true,
-    ignored: ['**/node_modules/**', '**/.git/**', '**/target/**'],
-    awaitWriteFinish: {
-      stabilityThreshold: 100,
-      pollInterval: 10,
-    },
-    usePolling: true,
-  }).on('all', (event, _path) => {
-    console.log(
-      chalk.blue(`[rsw::file::${event}] `),
-      chalk.yellow(`File ${_path}`),
-    );
-    callback(_path);
   });
 }

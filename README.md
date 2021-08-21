@@ -135,46 +135,25 @@ greet('World!');
 
 ## Remote Deployment
 
-Install [lencx/rsw-node](https://github.com/lencx/rsw-node) globally, you can use the `rsw` command.
-
-```bash
-npm i -g rsw-node
+```jsonc
+{
+  "scripts": {
++   "rsw:build": "rsw && npm run build"
+  }
+}
 ```
-
-<img width="480" src="./assets/rsw-node-help.png" alt="rsw help">
 
 ### Example
 
-#### Step1
-
-[learn-wasm/package.json](https://github.com/lencx/learn-wasm/blob/main/package.json)
-
-```bash
-npm install -D rsw-node
-```
+[lencx/learn-wasm](https://github.com/lencx/learn-wasm/blob/main/package.json)
 
 ```json
 "scripts": {
-  "rsw:deploy": "rsw && npm run build"
+  "rsw:build": "rsw && npm run build"
 }
 ```
 
 #### Step2
-
-[learn-wasm/.rswrc.json](https://github.com/lencx/learn-wasm/blob/main/.rswrc.json)
-
-```json
-{
-  "root": ".",
-  "crates": [
-    "@rsw/chasm",
-    "@rsw/game-of-life",
-    "@rsw/excel-read"
-  ]
-}
-```
-
-#### Step3
 
 [learn-wasm/.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
 
@@ -198,7 +177,7 @@ jobs:
         with:
           node-version: '14'
       - run: yarn
-      - run: yarn rsw:deploy # rsw-node build
+      - run: yarn rsw:build # rsw-node build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

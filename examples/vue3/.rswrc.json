@@ -1,7 +1,0 @@
-{
-  "root": ".",
-  "crates": [
-    "@rsw/hey",
-    "rsw-test"
-  ]
-}

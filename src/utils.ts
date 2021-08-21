@@ -5,6 +5,7 @@ import which from 'which';
 import debug from 'debug';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
+import chokidar from 'chokidar';
 import { execFileSync, execSync } from 'child_process';
 import fg from 'fast-glob';
 
@@ -22,6 +23,10 @@ export const isWin = os.platform() === 'win32';
 export const userRoot = process.env.HOME || '';
 
 export const wpCmd = isWin ? 'wasm-pack.exe' : 'wasm-pack';
+
+export const depsPathsDir = path.resolve(process.cwd(), '.rsw/paths');
+
+export const crateToFilename = (crate: string) => crate.replace(/\//g, '.');
 
 export const npmCmd = (cli?: CliType) => {
   if (cli && ['npm', 'pnpm'].includes(cli)) return cli;
@@ -199,24 +204,27 @@ export function genRswJson(data: string[]) {
     "scripts: {
   ${chalk.green`+    "rsw:build": "rsw && npm run build"`}
     }
-  }`));
+  }\n`));
   }
 
   if (!rswExists) return writeRsw('create');
 
   // match {svelte,vite}.config.{js,ts}
   const configName = fg.sync('{svelte,vite}.config.{js,ts}')?.[0];
-  const pkgFile = path.resolve(process.cwd(), configName);
+  const confFile = path.resolve(process.cwd(), configName);
   const rswMtime = fs.statSync(rswFile).mtimeMs;
-  const pkgMtime = fs.statSync(pkgFile).mtimeMs;
-  if (rswMtime < pkgMtime) writeRsw('update');
+  const confMtime = fs.statSync(confFile).mtimeMs;
+  if (rswMtime < confMtime) writeRsw('update');
 }
 
-export function getPaths(entries: string[], outFile: string, crateRoot: string) {
-  const paths = new Set();
+export function getDepsPath(entries: string[], crateRoot: string) {
+  fs.mkdirSync(depsPathsDir, { recursive: true });
 
   entries.forEach((entry: string) => {
-    const tomlFile = fs.readFileSync(entry, { encoding: 'utf-8' });
+    const paths = new Set();
+    const _crateRoot = path.join(crateRoot, entry);
+
+    const tomlFile = fs.readFileSync(`${_crateRoot}/Cargo.toml`, { encoding: 'utf-8' });
     const tomlData = toml.parse(tomlFile);
 
     const getVal = (prop: string | null, data: string | Object, root: string): void => {
@@ -246,8 +254,40 @@ export function getPaths(entries: string[], outFile: string, crateRoot: string) 
       tomlData.dependencies,
       tomlData['dev-dependencies'],
       tomlData['build-dependencies']
-    ], crateRoot);
-  })
+    ], _crateRoot);
 
-  fs.writeFileSync(outFile, `${[...paths].join('\n')}`, { encoding: 'utf-8' });
+    fs.writeFileSync(`${depsPathsDir}/${crateToFilename(entry)}`, `${[...paths].join('\n')}`, { encoding: 'utf-8' });
+  })
+}
+
+export function watchDeps(crate: string, callback: (...args: any) => void) {
+  const _crate = crateToFilename(crate);
+  const _file = `${depsPathsDir}/${_crate}`;
+  try {
+    const fileData = fs.readFileSync(_file, { encoding: 'utf-8' });
+    fileData.split('\n').forEach((itemPath) => {
+      watch([
+        path.join(itemPath, 'src'),
+        path.join(itemPath, 'Cargo.toml')
+      ], 'deps', callback);
+    })
+  } catch (e) {}
+}
+
+export function watch(args: string[], type: 'repo' | 'main' | 'deps', callback: (path: string) => void) {
+  chokidar.watch(args, {
+    ignoreInitial: true,
+    ignored: ['**/node_modules/**', '**/.git/**', '**/target/**'],
+    awaitWriteFinish: {
+      stabilityThreshold: 100,
+      pollInterval: 10,
+    },
+    usePolling: true,
+  }).on('all', (event, _path) => {
+    console.log(
+      chalk.blue(`[rsw::${type}::${event}] `),
+      chalk.yellow(`File ${_path}`),
+    );
+    callback(_path);
+  });
 }

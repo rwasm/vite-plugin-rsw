@@ -6,7 +6,7 @@ import type { Plugin, ResolvedConfig } from 'vite';
 import { rswOverlay, rswHot } from './template';
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugRsw, checkENV, checkCrate, getCratePath, loadWasm, genRswJson } from './utils';
+import { debugRsw, checkENV, checkCrate, getCratePath, loadWasm, genRswJson, getDepsPath } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 const cratePathMap = new Map<string, string>();
@@ -26,7 +26,10 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
     }
   });
 
-  genRswJson(Array.from(cratePathMap.keys()));
+  const crateList = Array.from(cratePathMap.keys());
+
+  genRswJson(crateList);
+  getDepsPath(crateList, crateRoot);
 
   const re = Array.from(cratePathMap.values()).map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
 
