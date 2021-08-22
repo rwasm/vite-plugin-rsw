@@ -36,6 +36,7 @@
 * multiple rust crate
   * compile
   * hot-update
+  * watch for dependent workspace crates ([#18](https://github.com/lencx/vite-plugin-rsw/issues/18))
 
 ![rsw run](./assets/rsw.png)
 ![rsw error](./assets/rsw-error.png)
@@ -153,11 +154,9 @@ greet('World!');
 }
 ```
 
-#### Step2
+[.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
 
-[learn-wasm/.github/workflows/deploy.yml](https://github.com/lencx/learn-wasm/blob/main/.github/workflows/deploy.yml)
-
-```yml
+```yaml
 # .github/workflows/deploy.yml
 
 name: github pages
@@ -177,7 +176,7 @@ jobs:
         with:
           node-version: '14'
       - run: yarn
-      - run: yarn rsw:build # rsw-node build
++     - run: yarn rsw:build # use rsw-node build
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
@@ -186,7 +185,7 @@ jobs:
           publish_dir: ./dist
 ```
 
-![rsw deploy](./assets/rsw-deploy.png)
+![rsw deploy](./assets/rsw-build.png)
 
 ## Video
 
@@ -195,9 +194,9 @@ jobs:
 
 ## Examples
 
+* [learn-wasm](https://github.com/lencx/learn-wasm)
 * [react](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/react)
 * [vue3](https://github.com/lencx/vite-plugin-rsw/tree/main/examples/vue3)
-* [learn-wasm](https://github.com/lencx/learn-wasm)
 
 ## Credits
 
