@@ -6,7 +6,7 @@ import type { Plugin, ResolvedConfig } from 'vite';
 import { rswOverlay, rswHot } from './template';
 import { rswCompile, rswWatch } from './compiler';
 import { RswPluginOptions, WasmFileInfo } from './types';
-import { debugRsw, checkENV, checkCrate, getCratePath, loadWasm, genRswJson, getDepsPath } from './utils';
+import { debugRsw, normalizePath, checkENV, checkCrate, getCratePath, loadWasm, genRswJson, getDepsPath } from './utils';
 
 const wasmMap = new Map<string, WasmFileInfo>();
 const cratePathMap = new Map<string, string>();
@@ -15,7 +15,8 @@ export function ViteRsw(userOptions: RswPluginOptions): Plugin {
   checkENV();
 
   let config: ResolvedConfig;
-  const crateRoot = path.resolve(process.cwd(), userOptions.root || '');
+  const crateRoot = normalizePath(path.resolve(process.cwd(), userOptions.root || ''));
+
   userOptions.crates.map((i) => {
     const _name = typeof i === 'string' ? i : i.name;
     if (!cratePathMap.has(_name)) {

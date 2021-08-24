@@ -1,3 +1,9 @@
+## 1.9.1 (2021-08-24)
+
+### fix
+
+- [Whitespaces in project path do not work](https://github.com/lencx/vite-plugin-rsw/issues/20)
+
 ## 1.9.0 (2021-08-22)
 
 - [Watch for dependent workspace crates](https://github.com/lencx/vite-plugin-rsw/issues/18)
