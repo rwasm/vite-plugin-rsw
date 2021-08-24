@@ -14,7 +14,7 @@ function compileOne(options: CompileOneOptions) {
   const { crate, sync, serve, filePath, root = '', outDir } = options;
 
   // 🚀 build release please use: https://github.com/lencx/rsw-node
-  const args = ['build', `--dev`, '--target', 'web'];
+  const args = ['build', '--dev', '--target', 'web'];
 
   let rswCrate: string;
   let pkgName: string;
@@ -30,9 +30,9 @@ function compileOne(options: CompileOneOptions) {
     pkgName = rswCrate;
   }
 
-  args.push('--out-name', pkgName);
-  if (scope) args.push('--scope', scope);
-  if (outDir) args.push('--out-dir', outDir);
+  args.push('--out-name', `'${pkgName}'`);
+  if (scope) args.push('--scope', `'${scope}'`);
+  if (outDir) args.push('--out-dir', `'${outDir}'`);
 
   debugRsw(`[wasm-pack build]: ${args.join(' ')}`);
 
