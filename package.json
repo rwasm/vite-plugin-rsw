@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-rsw",
   "description": "wasm-pack plugin for Vite",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "author": "lencx <cxin1314@gmail.com>",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -37,7 +37,7 @@
     "chokidar": "^3.5.0",
     "debug": "^4.3.2",
     "fast-glob": "^3.2.7",
-    "rsw-node": "^1.0.1",
+    "rsw-node": "^1.0.2",
     "which": "^2.0.2"
   },
   "devDependencies": {

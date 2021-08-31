@@ -30,9 +30,9 @@ function compileOne(options: CompileOneOptions) {
     pkgName = rswCrate;
   }
 
-  args.push('--out-name', `'${pkgName}'`);
-  if (scope) args.push('--scope', `'${scope}'`);
-  if (outDir) args.push('--out-dir', `'${outDir}'`);
+  args.push('--out-name', `"${pkgName}"`);
+  if (scope) args.push('--scope', `"${scope}"`);
+  if (outDir) args.push('--out-dir', `"${outDir}"`);
 
   debugRsw(`[wasm-pack build]: ${args.join(' ')}`);
 
@@ -96,7 +96,7 @@ export function rswCompile(options: RswCompileOptions) {
       isRun && checkMtime(
         srcPath,
         cargoPath,
-        `${outDir}/package.json`,
+        path.join(outDir, 'package.json'),
         () => compileOne({ config: opts, crate: _crate, sync: true, root, outDir: cratePathMap?.get(_name) }),
         () => console.log(chalk.yellow(`[rsw::optimized] wasm-pack build ${_name}.`)),
       );
@@ -187,6 +187,7 @@ function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType, cli: 
       cwd: process.cwd(),
       stdio: 'inherit',
     });
+    return;
   }
 
   spawnSync(npm, [type, (pkgLinks as string)], {

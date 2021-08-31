@@ -26,17 +26,7 @@ export const wpCmd = isWin ? 'wasm-pack.exe' : 'wasm-pack';
 
 export const crateToFilename = (crate: string) => crate.replace(/\//g, '.');
 
-// fix: https://github.com/lencx/vite-plugin-rsw/issues/20#issuecomment-904562812
-// ------------------------------------------
-// escape a space in a file path in node.js
-// normalizePath('foo bar') // 'foo\\ bar'
-// -------------------------------------------
-// see: https://vitejs.dev/guide/api-plugin.html#path-normalization
-// normalizePath('foo\\bar') // 'foo/bar'
-// normalizePath('foo/bar') // 'foo/bar'
-export const normalizePath = (_path: string) => _path.replace('\\', '/').replace(/(\s+)/g, '\\$1');
-
-export const depsPathsDir = normalizePath(path.resolve(process.cwd(), '.rsw/paths'));
+export const depsPathsDir = path.resolve(process.cwd(), '.rsw/paths');
 
 export const npmCmd = (cli?: CliType) => {
   if (cli && ['npm', 'pnpm'].includes(cli)) return cli;
@@ -173,7 +163,7 @@ export function gitInfo() {
 
 export function getRswPackage() {
   try {
-    const pkgJson = normalizePath(path.resolve(process.cwd(), 'node_modules/vite-plugin-rsw/package.json'));
+    const pkgJson = path.resolve(process.cwd(), 'node_modules/vite-plugin-rsw/package.json');
     const data = fs.readFileSync(pkgJson, { encoding: 'utf-8' });
     return JSON.parse(data);
   } catch (e) {
@@ -202,7 +192,7 @@ export function checkCrate(cratePath: string, crate: string) {
 }
 
 export function genRswJson(data: string[]) {
-  const rswFile = normalizePath(path.resolve(process.cwd(), '.rsw.json'));
+  const rswFile = path.resolve(process.cwd(), '.rsw.json');
   const rswExists = fs.existsSync(rswFile);
 
   const writeRsw = (type: string) => {
@@ -221,7 +211,7 @@ export function genRswJson(data: string[]) {
 
   // match {svelte,vite}.config.{js,ts}
   const configName = fg.sync('{svelte,vite}.config.{js,ts}')?.[0];
-  const confFile = normalizePath(path.resolve(process.cwd(), configName));
+  const confFile = path.resolve(process.cwd(), configName);
   const rswMtime = fs.statSync(rswFile).mtimeMs;
   const confMtime = fs.statSync(confFile).mtimeMs;
   if (rswMtime < confMtime) writeRsw('update');
