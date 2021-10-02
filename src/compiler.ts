@@ -155,24 +155,47 @@ export function rswCompile(options: RswCompileOptions) {
 }
 
 export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevServer, cratePathMap: Map<string, string>) {
-  watch([path.resolve(root, 'package.json')], 'repo', (_path) => {
-    rswCompile({ config, root, serve, filePath: _path, cratePathMap });
+  const _root = path.join('**', config.root || '');
+  let _unwatch = config?.unwatch?.map((i) => path.join(_root, i)) || [];
+
+  watch({
+    type: 'repo',
+    unwatch: [],
+    paths: [path.resolve(root, 'package.json')],
+    callback: (_path) => {
+      rswCompile({ config, root, serve, filePath: _path, cratePathMap });
+    },
   });
 
   config.crates.forEach((crate: string | RswCrateOptions) => {
     const name = getCrateName(crate);
+    if (typeof crate === 'object') {
+      const _crate = crate as RswCrateOptions;
+      const _paths = _crate?.unwatch?.map((i) => path.join(_root, name, i));
+      _unwatch = [...new Set(_unwatch.concat(_paths || []))];
+    }
+
     // One-liner for current directory
     // https://github.com/paulmillr/chokidar
-    watch([
-      path.resolve(root, name, 'src'),
-      path.resolve(root, name, 'Cargo.toml'),
-    ], 'main', (_path) => {
-      rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
+    watch({
+      type: 'crate',
+      unwatch: _unwatch,
+      paths: [
+        path.resolve(root, name, 'src'),
+        path.resolve(root, name, 'Cargo.toml'),
+      ],
+      callback: (_path) => {
+        rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
+      },
     });
-    watchDeps(name, (_path) => {
+    watchDeps(name, _unwatch, (_path) => {
       rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
     });
   })
+
+  console.log(
+    chalk.blue(`[rsw::unwatch]\n${chalk.yellow(JSON.stringify(_unwatch, null, 2))}`),
+  );
 }
 
 function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType, cli: CliType) {

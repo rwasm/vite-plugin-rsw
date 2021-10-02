@@ -9,7 +9,7 @@ import chokidar from 'chokidar';
 import { execFileSync, execSync } from 'child_process';
 import fg from 'fast-glob';
 
-import { RswCrateOptions, CliType } from './types';
+import { RswCrateOptions, CliType, watchOptions } from './types';
 import { cargoToml, crateLib, crateCodeHelp, rswInfo } from './template';
 
 const nodeBin = process.argv[0];
@@ -260,24 +260,31 @@ export function getDepsPath(entries: string[], crateRoot: string) {
   })
 }
 
-export function watchDeps(crate: string, callback: (...args: any) => void) {
+export function watchDeps(crate: string, unwatch: string[], callback: (...args: any) => void) {
   const _crate = crateToFilename(crate);
   const _file = `${depsPathsDir}/${_crate}`;
   try {
     const fileData = fs.readFileSync(_file, { encoding: 'utf-8' });
     fileData.split('\n').forEach((itemPath) => {
-      watch([
-        path.join(itemPath, 'src'),
-        path.join(itemPath, 'Cargo.toml')
-      ], 'deps', callback);
+      watch({
+        type: 'deps',
+        unwatch,
+        callback,
+        paths: [
+          path.join(itemPath, 'src'),
+          path.join(itemPath, 'Cargo.toml')
+        ],
+      });
     })
   } catch (e) {}
 }
 
-export function watch(args: string[], type: 'repo' | 'main' | 'deps', callback: (path: string) => void) {
-  chokidar.watch(args, {
+export function watch({ paths, unwatch, type, callback }: watchOptions) {
+  const _unwatch = ['**/node_modules/**', '**/.git/**', '**/target/**', ...unwatch];
+
+  chokidar.watch(paths, {
     ignoreInitial: true,
-    ignored: ['**/node_modules/**', '**/.git/**', '**/target/**'],
+    ignored: _unwatch,
     awaitWriteFinish: {
       stabilityThreshold: 100,
       pollInterval: 10,

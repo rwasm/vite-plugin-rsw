@@ -4,10 +4,22 @@ export type NpmCmdType = 'install' | 'link' | 'unlink';
 
 export type CliType = 'npm' | 'pnpm';
 
+// feat: https://github.com/lencx/vite-plugin-rsw/issues/22
 export type RswCrateOptions = {
+  // support `--out-name` and `scope`
   name: string;
+  // `--out-dir`
   outDir?: string;
-  // other wasm-pack options
+  // defalut: 'web'
+  target?: 'bundler' | 'web' | 'nodejs' | 'deno' | 'no-modules';
+  // no default value
+  mode?: 'no-install' | 'normal';
+  // extra options
+  extraOpts?: string[];
+  // https://github.com/lencx/vite-plugin-rsw/issues/24
+  // when crate is built in a watched directory,
+  // stop watching files, directories, or glob patterns, takes an array of strings.
+  unwatch?: string[];
 }
 
 export type WasmFileInfo = {
@@ -25,6 +37,8 @@ export type BaseRswConfig = {
 // Plugin options
 export type RswPluginOptions = BaseRswConfig & {
   crates: Array<string|RswCrateOptions>;
+  // stop watching files, directories, or glob patterns, takes an array of strings
+  unwatch?: string[];
 }
 
 export type CompileOneOptions = {
@@ -45,4 +59,11 @@ export type RswCompileOptions = {
   filePath?: string;
   npmType?: NpmCmdType;
   cratePathMap?: Map<string, string>;
+}
+
+export type watchOptions = {
+  paths: string[];
+  unwatch: string[];
+  type: 'repo' | 'crate' | 'deps';
+  callback: (path: string) => void;
 }

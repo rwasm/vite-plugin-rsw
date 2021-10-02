@@ -51,9 +51,10 @@
 * `cli`: specified package manager `npm` or `pnpm`, default `npm`.
 * `root`: rust crate root path. default project root path.
 * `unLinks`: `string[]` - (npm unlink) uninstalls a package.
-* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L26) - (npm link) package name, support npm organization.
+* `unwatch`: `string[]` - stop watching files, directories, or glob patterns, takes an array of strings.
+* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L38-L42) - (npm link) package name, support npm organization.
   * *Item as string* - `'@rsw/hello'`
-  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path' }`
+  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path', unwatch: './pkg' }` [Infinite loop when crate is built in a watched directory](https://github.com/lencx/vite-plugin-rsw/issues/24)
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
