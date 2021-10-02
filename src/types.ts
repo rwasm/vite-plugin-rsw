@@ -4,6 +4,10 @@ export type NpmCmdType = 'install' | 'link' | 'unlink';
 
 export type CliType = 'npm' | 'pnpm';
 
+export type TargetType = 'bundler' | 'web' | 'nodejs' | 'no-modules';
+
+export type ProfileType = 'dev' | 'release' | 'profiling';
+
 // feat: https://github.com/lencx/vite-plugin-rsw/issues/22
 export type RswCrateOptions = {
   // support `--out-name` and `scope`
@@ -11,7 +15,9 @@ export type RswCrateOptions = {
   // `--out-dir`
   outDir?: string;
   // defalut: 'web'
-  target?: 'bundler' | 'web' | 'nodejs' | 'deno' | 'no-modules';
+  target?: TargetType;
+  // default: 'dev'
+  profile?: ProfileType;
   // no default value
   mode?: 'no-install' | 'normal';
   // extra options
@@ -32,6 +38,8 @@ export type BaseRswConfig = {
   // feat: https://github.com/lencx/vite-plugin-rsw/issues/14
   cli?: CliType; // default: npm
   unLinks?: Array<string|RswCrateOptions>;
+  profile?: ProfileType;
+  target?: TargetType;
 }
 
 // Plugin options
@@ -54,7 +62,7 @@ export type CompileOneOptions = {
 export type RswCompileOptions = {
   config: RswPluginOptions;
   root: string;
-  crate?: string;
+  crate?: string | RswCrateOptions;
   serve?: ViteDevServer;
   filePath?: string;
   npmType?: NpmCmdType;

@@ -11,10 +11,10 @@ import { CompileOneOptions, RswCompileOptions, RswPluginOptions, RswCrateOptions
 const cacheMap = new Map<string, string>();
 
 function compileOne(options: CompileOneOptions) {
-  const { crate, sync, serve, filePath, root = '', outDir } = options;
+  const { config, crate, sync, serve, filePath, root = '', outDir } = options;
 
   // 🚀 build release please use: https://github.com/lencx/rsw-node
-  const args = ['build', '--dev', '--target', 'web'];
+  const args = ['build'];
 
   let rswCrate: string;
   let pkgName: string;
@@ -33,6 +33,18 @@ function compileOne(options: CompileOneOptions) {
   args.push('--out-name', `"${pkgName}"`);
   if (scope) args.push('--scope', `"${scope}"`);
   if (outDir) args.push('--out-dir', `"${outDir}"`);
+
+  if (!config.profile && !(crate as RswCrateOptions)?.profile) args.push('--dev');
+  if (!config.target && !(crate as RswCrateOptions)?.target) args.push('--target', 'web');
+  if (config.target && !(crate as RswCrateOptions)?.target) args.push('--target', config.target);
+  if (config.profile && !(crate as RswCrateOptions)?.profile) args.push(`--${config.profile}`);
+
+  if (typeof crate === 'object') {
+    if (crate.profile) args.push(`--${crate.profile}`);
+    if (crate.target) args.push('--target', `"${crate.target}"`);
+    if (crate.mode) args.push('--mode', `"${crate.mode}"`);
+    if (crate.extraOpts) args.push(...(crate.extraOpts || []));
+  }
 
   debugRsw(`[wasm-pack build]: ${args.join(' ')}`);
 
@@ -185,11 +197,11 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
         path.resolve(root, name, 'Cargo.toml'),
       ],
       callback: (_path) => {
-        rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
+        rswCompile({ config, root, crate, serve, filePath: _path, cratePathMap });
       },
     });
     watchDeps(name, _unwatch, (_path) => {
-      rswCompile({ config, root, crate: name, serve, filePath: _path, cratePathMap });
+      rswCompile({ config, root, crate, serve, filePath: _path, cratePathMap });
     });
   })
 

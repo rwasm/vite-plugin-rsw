@@ -48,13 +48,22 @@
 
 ## Plugin Options
 
-* `cli`: specified package manager `npm` or `pnpm`, default `npm`.
+* `cli`: specified package manager `npm` or `pnpm`, default value `npm`.
 * `root`: rust crate root path. default project root path.
 * `unLinks`: `string[]` - (npm unlink) uninstalls a package.
 * `unwatch`: `string[]` - stop watching files, directories, or glob patterns, takes an array of strings.
-* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L38-L42) - (npm link) package name, support npm organization.
+* `profile`: `'dev' | 'release' | 'profiling'`, default value `dev`. [wasm-pack build.profile](https://rustwasm.github.io/docs/wasm-pack/commands/build.html#profile)
+* `target`: `'bundler' | 'web' | 'nodejs' | 'no-modules'`, default value `web` [wasm-pack build.target](https://rustwasm.github.io/docs/wasm-pack/commands/build.html#target)
+* `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L46-L50) - (npm link) package name, support npm organization. [wasm-pack build doc](https://rustwasm.github.io/docs/wasm-pack/commands/build.html)
   * *Item as string* - `'@rsw/hello'`
-  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path', unwatch: './pkg' }` [Infinite loop when crate is built in a watched directory](https://github.com/lencx/vite-plugin-rsw/issues/24)
+  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path', unwatch: './pkg' }` use `unwatch` to avoid infinite loops when crate is built in a watched directory [#24](https://github.com/lencx/vite-plugin-rsw/issues/24)
+    * `name` - support `--out-name` and `scope`
+    * `outDir` - `--out-dir`
+    * `target` - `'bundler' | 'web' | 'nodejs' | 'no-modules'`, default value `web`
+    * `profile` - `'dev' | 'release' | 'profiling'`, default value `dev`
+    * `mode` - `'no-install' | 'normal'`, no default value
+    * `extraOpts` - extra options
+    * `unwatch` - stop watching files, directories, or glob patterns, takes an array of strings
 
 > **⚠️ Note:** Before performing the `vite build`, at least once `vite dev`, generate `wasm package (rust-crate/pkg)`. In the project, `wasm package` is installed by `vite-plugin-rsw` in the form of `npm link`, otherwise it will error `Can not find module 'rust-crate' or its corresponding type declarations.`
 
