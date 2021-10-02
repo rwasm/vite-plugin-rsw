@@ -1,3 +1,9 @@
+## 1.10.0 (2021-10-02)
+
+### feature
+
+- [Add plugin options](https://github.com/lencx/vite-plugin-rsw/issues/22)
+
 ## 1.9.1 (2021-08-24)
 
 ### fix
