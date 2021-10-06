@@ -56,7 +56,7 @@
 * `target`: `'bundler' | 'web' | 'nodejs' | 'no-modules'`, default value `web` [wasm-pack build.target](https://rustwasm.github.io/docs/wasm-pack/commands/build.html#target)
 * `crates`: [Item[ ]](https://github.com/lencx/vite-plugin-rsw/blob/main/src/types.ts#L46-L50) - (npm link) package name, support npm organization. [wasm-pack build doc](https://rustwasm.github.io/docs/wasm-pack/commands/build.html)
   * *Item as string* - `'@rsw/hello'`
-  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path', unwatch: './pkg' }` use `unwatch` to avoid infinite loops when crate is built in a watched directory [#24](https://github.com/lencx/vite-plugin-rsw/issues/24)
+  * *Item as RswCrateOptions* - `{ name: '@rsw/hello', outDir: 'custom/path', unwatch: ['./pkg'] }` use `unwatch` to avoid infinite loops when crate is built in a watched directory [#24](https://github.com/lencx/vite-plugin-rsw/issues/24)
     * `name` - support `--out-name` and `scope`
     * `outDir` - `--out-dir`
     * `target` - `'bundler' | 'web' | 'nodejs' | 'no-modules'`, default value `web`
