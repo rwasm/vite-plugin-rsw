@@ -147,7 +147,7 @@ export function rswCompile(options: RswCompileOptions) {
   }
 
   // watch: file change
-  if (crate) {
+  if (typeof crate === 'string') {
     compileOne({ config: opts, crate, sync: false, serve, filePath, root, outDir: cratePathMap?.get(crate) });
     return;
   }
