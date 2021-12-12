@@ -25,7 +25,7 @@
 ## Article
 
 * [中文 - WebAssembly入门](https://lencx.github.io/book/wasm/rust_wasm_frontend.html)
-* [WebAssembly Series](https://github.com/lencx/fzj/discussions/22)
+* [Awesome WebAssembly](https://github.com/lencx/awesome/blob/main/WebAssembly.md)
 
 ## Features
 
@@ -69,37 +69,42 @@
 
 ## Quick Start
 
-[create-xc-app](https://github.com/lencx/create-xc-app): create a project in seconds!
+[create-mpl](https://github.com/lencx/create-mpl): create a project in seconds!
 
 ### Step1
 
 ```bash
 # With NPM
-npm init xc-app
+npm init mpl@lastst
 
 # With Yarn:
-yarn create xc-app
+yarn create mpl
 ```
 
-You can also directly specify the project name and the template you want to use via additional command line options.
-
 ```bash
+# --type, -t: web | wasm | mini | electron | extension | chrome | github
+
 # npm 6.x
-npm init xc-app my-wasm-app --template wasm-react
+npm init mpl@latest my-app --type wasm
 
 # npm 7+, extra double-dash is needed:
-npm init xc-app my-wasm-app -- --template wasm-react
+npm init mpl@latest my-app -- --type wasm
 
 # yarn
-yarn create xc-app my-wasm-app --template wasm-react
+yarn create mpl my-app --type wasm
+
+# pnpm
+pnpm create mpl my-app -- --type wasm
 ```
 
 Currently supported template presets include `wasm-vue3` and `wasm-react`.
 
+<img width="600" src="./assets/wasm-init.png" alt="wasm init">
+
 ### Step2
 
 ```bash
-cd my-wasm-app
+cd my-app
 
 npm install
 

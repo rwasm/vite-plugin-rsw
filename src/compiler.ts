@@ -205,9 +205,11 @@ export function rswWatch(config: RswPluginOptions, root: string, serve: ViteDevS
     });
   })
 
-  console.log(
-    chalk.blue(`[rsw::unwatch]\n${chalk.yellow(JSON.stringify(_unwatch, null, 2))}`),
-  );
+  if (_unwatch.length > 0) {
+    console.log(
+      chalk.blue(`[rsw::unwatch]\n${chalk.yellow(JSON.stringify(_unwatch, null, 2))}`),
+    );
+  }
 }
 
 function rswPkgsLink(pkgs: string | Map<string, string>, type: NpmCmdType, cli: CliType) {
