@@ -75,7 +75,7 @@
 
 ```bash
 # With NPM
-npm init mpl@lastst
+npm init mpl@latest
 
 # With Yarn:
 yarn create mpl
