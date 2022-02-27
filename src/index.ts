@@ -20,7 +20,6 @@ export function ViteRsw(): Plugin {
             server.ws.send({ type: 'custom', event: 'rsw-error-close' });
           }
           if (opts.status === 'err') {
-            // error
             server.ws.send({
               type: 'custom',
               event: 'rsw-error',
