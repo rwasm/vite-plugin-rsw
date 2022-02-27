@@ -1,5 +1,3 @@
-import chalk from 'chalk';
-
 class RustError {
   // current line
   line: string;
@@ -7,21 +5,17 @@ class RustError {
   index: number;
   // browser display
   msgTagGroup: string[];
-  // terminal display
-  msgCmdGroup: string[];
 
   constructor() {
     this.line = '';
     this.index = -1;
     this.msgTagGroup = [];
-    this.msgCmdGroup = [];
   }
 
   init(line: string, index: number) {
     this.line = line;
     this.index= index;
     this.msgTagGroup[index] = line;
-    this.msgCmdGroup[index] = line;
     return this;
   }
 
@@ -31,27 +25,17 @@ class RustError {
     }
   }
 
-  setCmd(color: string, reg: RegExp) {
-    if (new RegExp(reg).test(this.line)) {
-      this.msgCmdGroup[this.index] = this.line.replace(reg, (chalk.bold as any)[color]('$1'));
-    }
-  }
-
-  handle(type: string, color: string, reg: RegExp) {
+  handle(type: string, reg: RegExp) {
     this.setTag(type, reg);
-    this.setCmd(color, reg);
     return this;
   }
 
   getValue() {
-    return {
-      msgTag: this.msgTagGroup.join('\n'),
-      msgCmd: this.msgCmdGroup.join('\n'),
-    };
+    return this.msgTagGroup.join('\n');
   }
 }
 
-export default function fmtRustError(content: string) {
+export default function fmtRustError(content: String) {
   const rsIns = new RustError();
   /**
    *   Compiling crate
@@ -66,11 +50,11 @@ export default function fmtRustError(content: string) {
    */
   content.split('\n').forEach((line, index) => {
     rsIns.init(line, index)
-      .handle('line', 'blue', /(^\s+-->|\s*=|[\s\d]*\|)/)
-      .handle('compiling', 'green', /(^\s+Compiling)/)
-      .handle('error', 'red', /(^error(\[\w+\])?)/)
-      .handle('warn', 'yellow', /(^warning)/)
-      .handle('help', 'cyan', /(^help)/);
+      .handle('line', /(^\s+-->|\s*=|[\s\d]*\|)/)
+      .handle('compiling', /(^\s+Compiling)/)
+      .handle('error', /(^error(\[\w+\])?)/)
+      .handle('warn', /(^warning)/)
+      .handle('help', /(^help)/);
   });
 
   return rsIns.getValue();

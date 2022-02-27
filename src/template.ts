@@ -1,17 +1,3 @@
-import chalk from 'chalk';
-import { gitInfo, getPkgName, getRswPackage } from './utils';
-
-export const rswHot = `
-if (import.meta.hot) {
-  import.meta.hot.on('rsw-error', (data) => {
-    createRswErrorOverlay(data);
-    throw \`\n🦀\${data.plugin} ~> \${data.id}\n\n\${data.console}\`
-  })
-  import.meta.hot.on('rsw-error-close', (data) => {
-    window.location.reload();
-  })
-}`;
-
 export const rswOverlay = `
 const rswTemplate = \`
 <style>
@@ -119,7 +105,6 @@ code {
   </div>
 </div>
 \`;
-
 class RswErrorOverlay extends HTMLElement {
   constructor(payload) {
     super()
@@ -128,7 +113,6 @@ class RswErrorOverlay extends HTMLElement {
     this.text('.message', payload.message.trim());
     this.text('.plugin', payload.plugin.trim());
     this.text('.file', payload.id.trim());
-
     this.root.querySelector('.window').addEventListener('click', (e) => {
       e.stopPropagation();
     });
@@ -136,95 +120,25 @@ class RswErrorOverlay extends HTMLElement {
       this.close();
     });
   }
-
   text(selector, text) {
     const el = this.root.querySelector(selector);
     if (el) el.innerHTML = text;
   }
-
   close() {
     if (this.parentNode) this.parentNode.removeChild(this);
   }
 }
-
 const overlayRswId = 'vite-rsw-error-overlay';
 if (!customElements.get(overlayRswId)) {
   customElements.define(overlayRswId, RswErrorOverlay);
 }
-
 function createRswErrorOverlay(err) {
   clearRswErrorOverlay();
   document.body.appendChild(new RswErrorOverlay(err));
 }
-
 function clearRswErrorOverlay() {
   document
     .querySelectorAll(overlayRswId)
     .forEach((n) => n.close());
 }
-
-window.createRswErrorOverlay = createRswErrorOverlay;
-`;
-
-export const cargoToml = (pkgName: string) => {
-  const { name, email } = gitInfo();
-  let authors = `\n`;
-  if (name) authors += `authors = ["${name} <${email}>"]`;
-  return `[package]
-name = "${getPkgName(pkgName)}"
-version = "0.1.0"${authors}
-edition = "2018"
-
-[lib]
-crate-type = ["cdylib", "rlib"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-wasm-bindgen = "0.2.75"
-`;
-};
-
-export const crateLib = `use wasm_bindgen::prelude::*;
-
-// Import the \`window.alert\` function from the Web.
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-// Export a \`greet\` function from Rust to JavaScript, that alerts a
-// hello message.
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(&format!("Hello, {}!", name));
-}
-`;
-
-export const crateCodeHelp = (pkgName: string) => `┏━━━━━
-┃ // https://github.com/rustwasm/wasm-pack
-┃ // https://github.com/rustwasm/wasm-bindgen
-┃
-┃ // Use exported Rust things from JavaScript with ECMAScript modules!
-┃ import init, { greet } from '${pkgName}';
-┃
-┃ // 1. \`WebAssembly.Instance\` initialization
-┃ init();
-┃
-┃ // 2. Make sure this method is executed after \`init()\` is called
-┃ greet('World!');
-┗━━━━
-`;
-
-export const rswInfo = () => {
-  const data: any = getRswPackage();
-  const info = `vite-plugin-rsw (${data.version || '0.0.0'})`;
-  return chalk.bold`
-${'🦀'.repeat(19)}
-⚡️⚡️         Hello RSW!           ⚡️⚡️
-⚡️⚡️  Vite + Rust 💖 WebAssembly  ⚡️⚡️
-${'🦀'.repeat(19)}
-${chalk.grey(info)}
-${chalk.grey('[rsw::deploy] https://github.com/lencx/rsw-node')}
-`;
-}
+window.createRswErrorOverlay = createRswErrorOverlay;`;

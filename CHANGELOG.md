@@ -1,3 +1,7 @@
+## 2.0.0 (2022-02-27)
+
+- a major upgrade based on `rsw-rs`
+
 ## 1.10.0 (2021-10-02)
 
 ### feature
