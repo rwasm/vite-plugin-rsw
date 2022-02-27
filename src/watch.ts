@@ -5,23 +5,38 @@ import readline from 'readline';
 interface RswInfo {
   status: 'ok' | 'err' | '';
   name: string;
-  file: string;
-  args: string;
+  path: string;
+  build: string;
   error: string;
 }
 
 const rswContent: RswInfo = {
   status: '',
   name: '',
-  args: '',
+  build: '',
   error: '',
-  file: '',
+  path: '',
 };
 
 const rswInfo = path.resolve(process.cwd(), '.rsw', 'rsw.info');
 const rswErr = path.resolve(process.cwd(), '.rsw', 'rsw.err');
+const rswCrates = path.resolve(process.cwd(), '.rsw', 'rsw.crates');
 
-export function watch(callback: (opts: RswInfo) => void) {
+const getVal = (line: string): string => line.split(' :~> ')?.[1] || '';
+
+export const getCrates = (): string[] => {
+  const crates: string[] = [];
+  if (fs.existsSync(rswCrates)) {
+    const content = fs.readFileSync(rswCrates, { encoding: 'utf8' });
+    content.split('\n').forEach(line => {
+      const val = getVal(line);
+      if (val) crates.push(val);
+    })
+  }
+  return crates;
+}
+
+export const watch = (callback: (opts: RswInfo) => void) => {
   fs.watchFile(rswInfo, {
     bigint: false,
     interval: 300,
@@ -42,13 +57,13 @@ export function watch(callback: (opts: RswInfo) => void) {
           rswContent.status = 'err';
           break;
         case /\[RSW::NAME\]/.test(line):
-          rswContent.name = line.match(/(\[RSW::NAME\] )(.*)/)?.[2] || '';
+          rswContent.name = getVal(line);
           break;
-        case /\[RSW::FILE\]/.test(line):
-          rswContent.file = line.match(/(\[RSW::FILE\] )(.*)/)?.[2] || '';
+        case /\[RSW::PATH\]/.test(line):
+          rswContent.path = getVal(line);
           break;
-        case /\[RSW::ARGS\]/.test(line):
-          rswContent.args = line.match(/(\[RSW::ARGS\] )(.*)/)?.[2] || '';
+        case /\[RSW::BUILD\]/.test(line):
+          rswContent.build = getVal(line);
           break;
       }
     });

@@ -1,3 +1,11 @@
+export const rswHot = `
+if (import.meta.hot) {
+  import.meta.hot.on('rsw-error', (data) => {
+    createRswErrorOverlay && createRswErrorOverlay(data);
+    throw \`\n🦀\${data.plugin} ~> \${data.id}\n\n\${data.console}\`
+  })
+}`;
+
 export const rswOverlay = `
 const rswTemplate = \`
 <style>

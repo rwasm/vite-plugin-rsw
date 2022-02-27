@@ -1,11 +1,13 @@
 import type { Plugin, ResolvedConfig } from 'vite';
 
-import { watch } from './watch';
+import { watch, getCrates } from './watch';
 import fmtRustError from './rswerr';
-import { rswOverlay } from './template';
+import { rswOverlay, rswHot } from './template';
 
 export function ViteRsw(): Plugin {
   let config: ResolvedConfig;
+
+  const re = getCrates().map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
 
   return {
     name: 'vite-plugin-rsw',
@@ -13,11 +15,14 @@ export function ViteRsw(): Plugin {
     configResolved(_config) {
       config = _config;
     },
-    async handleHotUpdate({ file, server }) {
+    handleHotUpdate({ file, server }) {
       if (!/(\/debug\/)|(\/\.rsw\/)/.test(file)) {
         watch((opts) => {
           if (opts.status === 'ok') {
-            server.ws.send({ type: 'custom', event: 'rsw-error-close' });
+            server.ws.send({
+              type: 'full-reload',
+              path: '*'
+            });
           }
           if (opts.status === 'err') {
             server.ws.send({
@@ -26,18 +31,31 @@ export function ViteRsw(): Plugin {
               data: {
                 plugin: '[vite::rsw]',
                 message: fmtRustError(opts.error),
-                id: opts.file,
+                id: opts.path,
                 console: opts.error,
               },
             });
           }
         });
       }
+      return []
+    },
+    transform(code, id) {
+      if (new RegExp(`${re}`).test(id)) {
+        return code + rswHot;
+      }
+      return code;
     },
     transformIndexHtml(html) {
       // compiler error overlay
       if (config?.mode === 'development') {
-        return html.replace('</html>', `<script>${rswOverlay}</script></html>`);
+        return [
+          {
+            tag: 'script',
+            attrs: { type: 'module' },
+            children: rswOverlay,
+          },
+        ]
       }
       return html;
     },
