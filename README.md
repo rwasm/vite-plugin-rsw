@@ -27,7 +27,17 @@
 
 ### Install
 
-[@rsw/cli](https://github.com/lencx/rsw-rs): `rsw = rs(rust) → w(wasm)` - A command-line tool for automatically rebuilding local changes, based on the wasm-pack implementation.
+* [create-mpl](https://github.com/lencx/create-mpl) - ⚡️ Create a project in seconds!
+
+  ```bash
+  # npm 6.x
+  npm init mpl@latest my-app --type wasm
+
+  # npm 7+, extra double-dash is needed:
+  npm init mpl@latest my-app -- --type wasm
+  ```
+
+* [@rsw/cli](https://github.com/lencx/rsw-rs): `rsw = rs(rust) → w(wasm)` - A command-line tool for automatically rebuilding local changes, based on the wasm-pack implementation.
 
 ```bash
 # With NPM:
@@ -39,13 +49,14 @@ yarn add -D vite-plugin-rsw @rsw/cli
 
 ### package.json
 
-Open two terminal windows, execute `npm run rsw` in the first and `npm run dev` in the second. **Note: The order of execution is important, do not close the first window!**
+Open two terminal windows, execute `npm run watch` in the first and `npm run dev` in the second. **Note: The order of execution is important, do not close the first window!**
 
 ```json5
 // package.json
 "scripts": {
   "dev": "vite",
-  "rsw": "rsw watch",
+  "watch": "rsw watch",
+  "rsw": "rsw",
   "build": "rsw build && yarn fe:build",
   "fe:build": "tsc && vite build"
 }
