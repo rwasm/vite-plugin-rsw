@@ -124,7 +124,7 @@ Edit package.json
 
 ### Step 6
 
-> Deploy
+Deploy
 
 ```bash
 yarn build
