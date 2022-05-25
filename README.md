@@ -29,6 +29,18 @@
 
 Install
 
+> install rsw
+
+```bash
+# With Rust:
+cargo install rsw
+
+# With NPM:
+npm i -g @rsw/cli
+```
+
+> install vite-plugin-rsw
+
 ```bash
 # With NPM:
 npm i -D vite-plugin-rsw
@@ -132,7 +144,8 @@ yarn build
 
 ### Example
 
-[Demo](https://github.com/lencx/learn-wasm) - 🎲 Learning WebAssembly
+* [Demo](https://github.com/lencx/learn-wasm) - 🎲 Learning WebAssembly
+* [Oh My Box](https://github.com/lencx/OhMyBox) - 🔮 Development toolbox, and more...
 
 ## Related
 
