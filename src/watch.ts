@@ -22,18 +22,22 @@ const rswInfo = path.resolve(process.cwd(), '.rsw', 'rsw.info');
 const rswErr = path.resolve(process.cwd(), '.rsw', 'rsw.err');
 const rswCrates = path.resolve(process.cwd(), '.rsw', 'rsw.crates');
 
-const getVal = (line: string): string => line.split(' :~> ')?.[1] || '';
+const getVal = (line: string): string[] => line.split(' :~> ') || [];
 
-export const getCrates = (): string[] => {
+export const getCrates = (): Record<string, string[]> => {
   const crates: string[] = [];
+  const cratesPath: string[] = [];
   if (fs.existsSync(rswCrates)) {
     const content = fs.readFileSync(rswCrates, { encoding: 'utf8' });
     content.split('\n').forEach(line => {
       const val = getVal(line);
-      if (val) crates.push(val);
+      if (val.length > 0) {
+        val?.[0] && crates.push(val?.[0]);
+        val?.[1] && cratesPath.push(val?.[1]);
+      }
     })
   }
-  return crates;
+  return { crates, cratesPath };
 }
 
 export const watch = (callback: (opts: RswInfo) => void) => {
@@ -49,6 +53,7 @@ export const watch = (callback: (opts: RswInfo) => void) => {
     });
 
     rl.on('line', (line) => {
+      const [, cratesPath] = getVal(line);
       switch (true) {
         case /\[RSW::OK\]/.test(line):
           rswContent.status = 'ok';
@@ -57,13 +62,13 @@ export const watch = (callback: (opts: RswInfo) => void) => {
           rswContent.status = 'err';
           break;
         case /\[RSW::NAME\]/.test(line):
-          rswContent.name = getVal(line);
+          rswContent.name = cratesPath;
           break;
         case /\[RSW::PATH\]/.test(line):
-          rswContent.path = getVal(line);
+          rswContent.path = cratesPath;
           break;
         case /\[RSW::BUILD\]/.test(line):
-          rswContent.build = getVal(line);
+          rswContent.build = cratesPath;
           break;
       }
     });

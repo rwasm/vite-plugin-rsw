@@ -1,3 +1,6 @@
+## 2.0.8 (2022-06-27)
+
+- fix: reload
 ## 2.0.0 (2022-02-27)
 
 - a major upgrade based on `rsw-rs`

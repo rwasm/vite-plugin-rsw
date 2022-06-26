@@ -7,16 +7,20 @@ import { rswOverlay, rswHot } from './template';
 export function ViteRsw(): Plugin {
   let config: ResolvedConfig;
 
-  const re = getCrates().map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
+  const { crates, cratesPath } = getCrates();
+  const re1 = crates.join('|').replace('/', '\\/');
+  const re2 = cratesPath.map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
+  const ids: string[] = [];
 
   return {
     name: 'vite-plugin-rsw',
     enforce: 'pre',
+    apply: 'serve',
     configResolved(_config) {
       config = _config;
     },
     handleHotUpdate({ file, server }) {
-      if (!/(\/debug\/)|(\/\.rsw\/)/.test(file)) {
+      if (!/(\/debug\/)|(\/\.rsw\/)/.test(file) && ids.includes(file)) {
         watch((opts) => {
           if (opts.status === 'ok') {
             server.ws.send({
@@ -38,10 +42,12 @@ export function ViteRsw(): Plugin {
           }
         });
       }
-      return []
     },
     transform(code, id) {
-      if (new RegExp(`${re}`).test(id)) {
+      if (new RegExp(`${re1}`).test(code)) {
+        ids.push(id);
+      }
+      if (new RegExp(`${re2}`).test(id)) {
         return code + rswHot;
       }
       return code;

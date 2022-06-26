@@ -17,29 +17,29 @@
 | >= `1.8.0`| >= `2.4.0`|
 |`1.7.0`|`2.0.0 ~ 2.3.8`|
 
+## Features
+
+- `HMR`
+- `Friendly error message` - browser and terminal
+
 ## Pre-installed
 
 * [rust](https://www.rust-lang.org/learn/get-started)
 * [nodejs](https://nodejs.org)
 * [wasm-pack](https://github.com/rustwasm/wasm-pack)
+* [rsw-rs](https://github.com/lencx/rsw-rs): `rsw = rs(rust) → w(wasm)` - A command-line tool for automatically rebuilding local changes, based on the wasm-pack implementation.
 
 ## Usage
 
 ### Step 1
 
-Install
-
-> install rsw
+Install rsw
 
 ```bash
-# With Rust:
 cargo install rsw
-
-# With NPM:
-npm i -g @rsw/cli
 ```
 
-> install vite-plugin-rsw
+Install vite-plugin-rsw
 
 ```bash
 # With NPM:
@@ -70,11 +70,9 @@ Edit package.json
 
 ```json5
 "scripts": {
-  "dev": "vite",
-  "watch": "rsw watch",
-  "rsw": "rsw",
-  "build": "rsw build && yarn fe:build",
-  "fe:build": "tsc && vite build"
+    "dev": "vite",
++   "rsw": "rsw",
++   "build": "rsw build && tsc && vite build",
 }
 ```
 
@@ -122,7 +120,7 @@ Edit package.json
    ```bash
    # rust crates - automatic build
    # ⚠️ Note: Do not exit the process after the command has started.
-   yarn watch
+   yarn rsw watch
    ```
 
 2. Run dev
@@ -132,7 +130,7 @@ Edit package.json
    yarn dev
    ```
 
-⚠️ Note: Open two terminal windows, execute `yarn watch` in the first and `yarn dev` in the second. **The order of execution is important, do not close the first window!**
+⚠️ Note: Open two terminal windows, execute `yarn rsw watch` in the first and `yarn dev` in the second. **The order of execution is important, do not close the first window!**
 
 ### Step 6
 
@@ -159,16 +157,6 @@ npm init mpl@latest my-app --type wasm
 
 # npm 7+, extra double-dash is needed:
 npm init mpl@latest my-app -- --type wasm
-```
-
-[@rsw/cli](https://github.com/lencx/rsw-rs): `rsw = rs(rust) → w(wasm)` - A command-line tool for automatically rebuilding local changes, based on the wasm-pack implementation.
-
-```bash
-# With Rust
-cargo install rsw
-
-# With NPM
-npm i -g @rsw/cli
 ```
 
 ---
