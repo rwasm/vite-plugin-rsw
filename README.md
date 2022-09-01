@@ -55,7 +55,7 @@ Edit vite.config.ts
 
 ```js
 import { defineConfig } from 'vite';
-import ViteRsw from 'vite-plugin-rsw';
+import { ViteRsw } from 'vite-plugin-rsw';
 
 export default defineConfig({
   plugins: [
