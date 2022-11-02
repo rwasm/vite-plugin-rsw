@@ -4,13 +4,14 @@ import { watch, getCrates } from './watch';
 import fmtRustError from './rswerr';
 import { rswOverlay, rswHot } from './template';
 
+const toUnixPath = (path: string) => path.replace(/[\\/]+/g, '/').replace(/^([a-zA-Z]+:|\.\/)/, '');
+
 export function ViteRsw(): Plugin {
   let config: ResolvedConfig;
 
-  const { crates, cratesPath } = getCrates();
-  const re1 = crates.join('|').replace('/', '\\/');
-  const re2 = cratesPath.map(i => `${i}/.*.js`).join('|').replace('/', '\\/');
-  const ids: string[] = [];
+  const { cratesPath } = getCrates();
+  // const re1 = crates.join('|');
+  const re2 = cratesPath.map(i => `${i}/.*.js`).join('|');
 
   return {
     name: 'vite-plugin-rsw',
@@ -20,7 +21,10 @@ export function ViteRsw(): Plugin {
       config = _config;
     },
     handleHotUpdate({ file, server }) {
-      if (!/(\/debug\/)|(\/\.rsw\/)/.test(file) && ids.includes(file)) {
+      let isInit = true;
+      const _file = toUnixPath(file);
+      if (/\/target(\/[\d\w-_]+)?\/debug\//.test(_file) || /\.rsw\//.test(_file)) return;
+      if (/\.rs$/.test(_file)) {
         watch((opts) => {
           if (opts.status === 'ok') {
             server.ws.send({
@@ -40,14 +44,12 @@ export function ViteRsw(): Plugin {
               },
             });
           }
-        });
+        }, isInit);
       }
     },
     transform(code, id) {
-      if (new RegExp(`${re1}`).test(code)) {
-        ids.push(id);
-      }
-      if (new RegExp(`${re2}`).test(id)) {
+      const _id = toUnixPath(id);
+      if (new RegExp(`${re2}`).test(_id)) {
         return code + rswHot;
       }
       return code;

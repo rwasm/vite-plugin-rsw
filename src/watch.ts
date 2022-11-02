@@ -40,7 +40,7 @@ export const getCrates = (): Record<string, string[]> => {
   return { crates, cratesPath };
 }
 
-export const watch = (callback: (opts: RswInfo) => void) => {
+export const watch = (callback: (opts: RswInfo) => void, isInit: boolean) => {
   fs.watchFile(rswInfo, {
     bigint: false,
     interval: 300,
@@ -79,7 +79,8 @@ export const watch = (callback: (opts: RswInfo) => void) => {
       } else {
         rswContent.error = '';
       }
-      callback(rswContent);
+      if (isInit) callback(rswContent);
+      isInit = false;
     })
   })
 }
