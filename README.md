@@ -24,10 +24,10 @@
 
 ## Pre-installed
 
-* [rust](https://www.rust-lang.org/learn/get-started)
-* [nodejs](https://nodejs.org)
-* [wasm-pack](https://github.com/rustwasm/wasm-pack)
-* [rsw-rs](https://github.com/lencx/rsw-rs): `rsw = rs(rust) → w(wasm)` - A command-line tool for automatically rebuilding local changes, based on the wasm-pack implementation.
+- [rust](https://www.rust-lang.org/learn/get-started)
+- [nodejs](https://nodejs.org)
+- [wasm-pack](https://github.com/rustwasm/wasm-pack)
+- [rsw-rs](https://github.com/lencx/rsw-rs): `rsw = rs(rust) → w(wasm)` - A command-line tool for automatically rebuilding local changes, based on the wasm-pack implementation.
 
 ## Usage
 
@@ -70,9 +70,9 @@ Edit package.json
 
 ```json5
 "scripts": {
-    "dev": "vite",
-+   "rsw": "rsw",
++   "dev": "rsw watch & vite",
 +   "build": "rsw build && tsc && vite build",
++   "rsw": "rsw"
 }
 ```
 
@@ -115,22 +115,12 @@ Edit package.json
 
 ### Step 5
 
-1. Run rsw watch
+Start dev server
 
-   ```bash
-   # rust crates - automatic build
-   # ⚠️ Note: Do not exit the process after the command has started.
-   yarn rsw watch
-   ```
-
-2. Run dev
-
-   ```bash
-   # Front-end: start dev server
-   yarn dev
-   ```
-
-⚠️ Note: Open two terminal windows, execute `yarn rsw watch` in the first and `yarn dev` in the second. **The order of execution is important, do not close the first window!**
+```bash
+# rsw watch & vite
+yarn dev
+```
 
 ### Step 6
 
@@ -142,8 +132,9 @@ yarn build
 
 ### Example
 
-* [Demo](https://github.com/lencx/learn-wasm) - 🎲 Learning WebAssembly
-* [Oh My Box](https://github.com/lencx/OhMyBox) - 🔮 Development toolbox, and more...
+- [WA+](https://github.com/lencx/WA) - 🤩 Making a web page more like a desktop application is just the beginning, the possibilities are unlimited, up to your imagination!
+- [Demo](https://github.com/lencx/learn-wasm) - 🎲 Learning WebAssembly
+- [Oh My Box](https://github.com/lencx/OhMyBox) - 🔮 Development toolbox, and more...
 
 ## Related
 
