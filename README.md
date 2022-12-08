@@ -67,10 +67,10 @@ export default defineConfig({
 ### Step 3
 
 Edit package.json
-
+> recommend to use `concurrently`  instead of `&` to run command concurrently, because it can't handle system signal properly, see https://github.com/rwasm/rsw-rs/issues/7
 ```json5
 "scripts": {
-+   "dev": "rsw watch & vite",
++   "dev": "concurrently \"rsw watch\" \"vite\"",
 +   "build": "rsw build && tsc && vite build",
 +   "rsw": "rsw"
 }
