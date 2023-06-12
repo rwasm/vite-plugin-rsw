@@ -83,6 +83,11 @@ Edit package.json
 1. Initial rsw.toml
 
    ```bash
+   # With NPM
+   npm run rsw init
+   ```
+   
+   ```bash
    # yarn rsw -h
    yarn rsw init
    ```
@@ -95,8 +100,13 @@ Edit package.json
    # using: wasm-pack | rsw | user, default is `wasm-pack`
    using = "wasm-pack"
    ```
+   ```bash
+   # With NPM
+   npm run rsw new rsw-hello
+   ```
 
    ```bash
+   # With Yarn
    yarn rsw new rsw-hello
    ```
 
@@ -118,6 +128,12 @@ Edit package.json
 Start dev server
 
 ```bash
+# With NPM
+npm run dev
+```
+
+```bash
+# With Yarn
 # rsw watch & vite
 yarn dev
 ```
@@ -127,6 +143,12 @@ yarn dev
 Deploy
 
 ```bash
+# With NPM
+npm run build
+```
+
+```bash
+# With Yarn
 yarn build
 ```
 
